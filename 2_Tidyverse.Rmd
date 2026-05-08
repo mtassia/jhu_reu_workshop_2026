@@ -1,0 +1,442 @@
+---
+title: "02_Tidyverse"
+author: "Michael Tassia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## JHU Biology REU 2024 - `Tidyverse` and data analysis
+
+In our previous lesson, we used the ***packages*** native to `R` to create, manipulate, and filter data. Today, we'll be introducing the [`tidyverse`](https://www.tidyverse.org/) which is a collection of ***packages*** that "share an underlying design philosophy, grammar, and data structures." The `tidyverse` methods we use today will perform the same tasks as those we covered in the previous lesson (redundancy is a common theme in data science); however, in many cases the `tidyverse` ***packages*** can be more intuitive to use and easier to read.
+
+Today's lesson will cover a few key subjects:
+
+1.  Introduction to `tidyverse` (installation, loading, and documentation)
+2.  Using `tidyverse` for manipulating/tidying data
+3.  Data analysis and visualization
+
+The contents of today's lesson will follow closely with those detailed in Chapters 3, 5, and 9 of [`R for Data Science`](https://r4ds.hadley.nz/layers). In the final lesson of this workshop, we'll apply what we've learned to some example data you're likely to encounter during a career in biology.
+
+------------------------------------------------------------------------
+
+### Introduction to the `tidyverse`
+
+In the previous lesson, we learned about loading ***packages*** that were available to `R` by default upon installation. However, one of the strengths of programming (whether it's `R` or another language) is access to ***packages*** purpose-built to help analyze your data.
+
+Below, we'll download, install, and load the packages in the `tidyverse`:
+
+```{r, results=FALSE, message=FALSE, warning=FALSE}
+
+install.packages("tidyverse")
+library(tidyverse)
+
+?(tidyverse)
+```
+
+In the example above, we installed `tidyverse` by running the `install.packages()` ***function***. This ***function*** installs packages that are deposited on CRAN ("Comprehensive R Archival Network"). Although there are other repositories that store `R` ***packages,*** CRAN is the most common (followed by `GitHub` and `Bioconductor`). Most programs will provide instructions for their installation.
+
+Now that we have `tidyverse` loaded into our environment, let's briefly discuss the ***packages*** that are installed with it. As a reminder, because the `tidyverse` is loaded into your environment, you don't need to have prior knowledge of which ***package*** a command comes from, but simply that it is installed with `tidyverse`.
+
+There are four major ***packages*** in the `tidyverse` that we'll be focusing on (though there are more installed with `tidyverse`). We generally won't be referring to them by their ***package*** name, but it's nonetheless useful to know the source of these functions:
+
+-   `dplyr`: Intuitively accessing/manipulating ***data frames*** (or similarly-formatted objects)
+-   `tibble`: An alternative format to ***data frame*** (less flexible, but more accessible)
+-   `tidyr`: Functions to assist in organizing/tidying tabular data (e.g., ***data frames***)
+-   `ggplot2`: A flexible and powerful suite of potting tools
+
+To begin, let's load some data and interact with it using methods we've already covered, and then perform the same tasks using the ***functions*** installed with `tidyverse`. In the example below, we'll oscillate between running commands directly in the code block and running commands in the ***console*** below. Though we've been working in the `R Markdown` space here (the format of the file you're reading right now), more frequently you'll interact with data either through the `R` ***console*** (bottom left panel of `R Studio`) or ***scripts*** - a series of written commands that can be written to a file for repeated use (or logging). For now, let's proceed with loading and viewing data:
+
+```{r}
+
+df<-as.data.frame(billboard) # Load the `billboard` data into a data frame object
+
+# In the console (bottom left panel):
+#   1. Print your data frame
+#   2. Print only the first four columns of your data frame (remember the `[]` operators)
+#   3. Print only lines where the artist was "Eminem"
+
+```
+
+Using only the base ***functions*** of `R` to perform the tasks above can be a bit cumbersome (though nonetheless very powerful). Now, let's revisit the same tasks using `tidyverse` tools:
+
+```{r}
+
+df <- billboard # Load the `billboard` data (tibble by default)
+
+# Repeating the same steps above in the console:
+#   1. Print your data frame (what's different from the version saved as a data frame?)
+df
+
+#   2. Print on the first four columns of your dataframe
+df %>% select(1:4)
+
+#   3. Print on the lines where the artist was "Eminem"
+df %>% filter(artist == "Eminem")
+```
+
+Let's highlight a few new things you encountered in the code block above:
+
+-   `%>%`: We've introduced a new ***operator***, `%>%` which is called a "pipe". The `%>%` operator assists users string together multiple commands, where the output from one ***function*** is the input for the next ***function***. Alongside some of the functions in the `tidyverse` (e.g., `select()` and `filter()` above), this workflow allows you to reformat/transform data without needing many nested commands or multiple lines of code rewriting the same ***object***.
+
+-   ***tibble:*** We also introduced a new type of object: ***tibble***. `billboard` is a ***tibble object*** by default. Superficially, a ***tibble*** is very similar to a ***data frame*** and allows for simpler visualization (particularly in the ***console*** below). Though there are some nuanced differences between using ***tibbles*** and ***data frames***, we won't discuss them here. For now, they'll allow us to readily summarize large data sets, efficiently view them, and query the type of objects stored in a column.
+
+-   `dplyr` ***functions***: In the example above, we used `select()` and `filter()` to subset to columns and rows, respectively, by different criteria. Though we can perform these same tasks using base `R` ***functions***, the `dplyr` methods are a bit more intuitive. Though we didn't do it above, you can string together many `dplyr` ***functions*** using the `%>%` ***operator.***
+
+Let's discuss a few powerful commands that are included in the `tidyverse`, then we'll work through an exercise practicing what we've learned. As a reminder, you can use `help()` or `?<function>` to get detailed information about a ***function***.
+
+```{r}
+
+df <- billboard # Load the `billboard` data to the `df` object
+
+# select() 
+# Subset a data frame by variable (column)
+
+df %>% 
+  select(artist,date.entered) # Include columns by name
+
+df %>% 
+  select(!starts_with("wk")) # Excluding columns by prefix pattern
+
+```
+
+`select()` can be used to *select* columns from your ***data frame***. This is particularly important if your data is rich with variables and you're current analyses only focus on the relationships among a few.
+
+```{r}
+# filter()
+# Subset a data frame using values
+
+df %>% 
+  select(artist,track,date.entered) %>% # Subset to only columns of interest
+  filter(artist == "Eminem") # Include rows by artist value
+
+df %>% 
+  select(artist,track,date.entered) %>% # Subset to only columns of interest
+  filter(artist == "Eminem" & track == "Stan") # Filter by multiple columns
+
+```
+
+`filter()` is a counterpart to `select()`, as it allows you to *filter* to rows where an expression is true. For example, we used `filter()` to pull observations associated with the artist "Eminem" and track "Stan"
+
+```{r}
+# pivot_wider()
+# Transform a "wide" data frame to a "long" data frame.
+# Long data frames are easier to work with in programming! 
+
+df <- df %>%
+  pivot_longer(cols = starts_with("wk"), # Specify columns to transform
+              names_to = "week", # Specify the "names" column name
+              values_to = "rank") # Specify the "values" column name
+
+df <- df %>%
+  filter(!is.na(rank))
+
+df
+
+```
+
+In the last example, we took a "wide" ***data frame*** (I'll refer to anything structured like a ***data frame*** as a ***data frame***, even if it's a ***tibble*** for simplicity) and made it "longer". This is a common transformation step in data science, as sometimes it's easier to record data (particularly dated events) using a wide format. However, because we can capture all the *week* columns using a single *week* variable, we rearranged our data to fit this structure. We can also "pivot wider", but you won't see this during this workshop.
+
+Let's introduce a few more functions using the `iris` data set, then work through an example:
+
+```{r}
+
+library(datasets)
+df<-tibble(iris)
+
+# mutate()
+# Create/edit a variable in a data frame
+
+df <- df %>%
+  mutate(Petal.Area = Petal.Length * Petal.Width,
+         Sepal.Area = Sepal.Length * Sepal.Width) #Creating new columns by multiplying
+
+df <- df %>%
+  mutate(Species = paste("Iris",Species,sep="_")) #Editing a column using paste()
+
+```
+
+`mutate()` creates new column (or replaces a pre-existing column) using an expression provided by the user. Though we've used it to combine information across measurements and edit text, `mutate()` is also often used to convert column data between types (e.g., converting the integers `c(1, 2, 3)` into the strings `c("1","2","3")`) within a column.
+
+```{r}
+# arrange()
+# Sort a column by its values
+
+df %>% 
+  select(Species,Petal.Area,Sepal.Area) %>% # Selecting the columns we want
+  arrange(-Petal.Area) # Sorting by our new "Petal.Area" column (descending)
+
+```
+
+`arrange()` sorts a numeric variable (ascending by default).
+
+```{r}
+# summarise()
+# Perform functions on a group of observations
+
+df %>% 
+  summarise(PA.mean = mean(Petal.Area), # Compute the mean of Petal.Area
+            SA.mean = mean(Sepal.Area), # Compute the mean of Sepal.Area
+            .by = Species) # Compute means per unique value in the Species column
+
+```
+
+Lastly, `summarise()` can be used to make calculations *across* samples. This is in contrast to `mutate()` which is used to perform a task on each observation (i.e., per-row). In the example above, we used `summarise()` to compute a means across all observations per-species.
+
+The functions described above are powerful, particularly when data sets grow large. With the `Iris` example, imagine you are interested in identifying trends in flower anatomy. Though you've only directly measured "length" and "width", you can very quickly compute (e.g., using `mutate()`) metrics "area" or "ratio" to identify trends between species (e.g., using `summary()`). These same principles can be extended to genetic data, where there can be billions of "A", "T", "C", and "G" observations that can be used to identify trends.
+
+------------------------------------------------------------------------
+
+Now, let's work through an example. As the list of functions you've encountered has grown quite quickly during this lesson, I'll provide you a "function bank" below:
+
+-   `select()` - Subset columns
+-   `filter()` - Subset rows by column values
+-   `mutate()` - Create/Edit columns
+-   `arrange()` - Sort ***data frame*** by column values
+-   `summarise()` - Perform ***functions*** on a group of observations (Note: `.by = <variable>` allows you to select the grouping variable)
+-   `pivot_longer()` - Transform a "wide" ***data frame*** to a "long" ***data frame***
+
+```{r}
+
+# First, we'll load the data:
+df<-starwars
+
+# With these data, do the following (using the output from each step as input for the next):
+#   1. Subset to: name, height, mass, homeworld, species
+#   2. Remove any rows where either `height` or `mass` is NA (remember the `is.na()` test)
+#   3. Compute and create a column that contains the mass per unit height
+#   4. Arrange your data such by the values in your new column (descending)
+#   5. Which character has the lowest mass per unit height?
+
+# After you've done the tasks above:
+#   1. Using `summarise()`, which homeworld has the greatest mean `mass`?
+#   2. Using `summarise()`, which species has the greatest mean `mass`?
+
+```
+
+In the example above, we used the `starwars` data set and `tidyverse` commands to transform the data to A) Contain only the variables of interest, B) Compute new values "important" to our analysis, and C) Make conclusions about our observations. These same principles can be used with real biological data!
+
+Now that we have identified some trends in our data (using summary statistics like mean), let's work on visualizing our data.
+
+------------------------------------------------------------------------
+
+### Data visualization with `ggplot2`
+
+In addition to organizing data, another major pillar of data science is **visualization**. There are many reasons why data visualization is valuable to science, but I'll highlight some broader themes here:
+
+1.  **Exploration of data** - *facilitate* *the identification of unanticipated trends/patterns*
+2.  **Presentation of results** - *visualize results in support of a hypothesis/conclusion*
+3.  **Science communication** - *generalize science to a format digestible by a target audience*
+
+In this section of the workshop, we'll learn and practice plotting using `ggplot2`, a `tidyverse` ***package*** that uses the same grammar as we've been practicing above. There are other plotting ***packages*** for `R` (including those native to `R`), however, `ggplot2` is far more intuitive and modular - allowing for more flexibility and personal expression when plotting.
+
+------------------------------------------------------------------------
+
+As with many `tidyverse` packages, `ggplot2` has [robust documentation](https://ggplot2.tidyverse.org/) to help users generate plots relevant to their data visualization needs. There are many common paradigms in data plotting (far too many to discuss here), but we'll start from the ground-up and focus on the basics. If you want some plotting examples, there are plenty of online resources - one of my favorites is [The R Graph Gallery](https://r-graph-gallery.com/index.html).
+
+To begin, let's start by setting up our environment and loading our example data:
+
+```{r, results=FALSE, message=FALSE, warning=FALSE}
+
+library(tidyverse)
+df<-tibble(iris)
+```
+
+Now that we're set up, let's try and recreate the following plot that was generated using `ggplot` and the `iris` data set:
+
+![](iris_plot_example.png)
+
+First, we need to know precisely *what* is being plotted with `ggplot()`. Though there are many cosmetic elements to the plot above, the data being plotted can be summarized as the following:
+
+1.  `x-axis` is "Petal.Width"
+2.  `y-axis` is "Petal.Length"
+3.  `color` is "Species"
+4.  Plot style is a "scatter plot"
+
+**Next, let's walk through the syntax of plotting with `ggplot`**.
+
+```{r}
+
+# Create a `ggplot` object
+
+
+
+# By itself, this function doesn't appear do much (or anything). However, behind the scenes it has prepared the data for plotting. To see this, we can use the `glimpse()` function. Let's compare the data before and after `ggplot()` has transformed it:
+
+
+
+# In addition to preparing the underlying data, we also need to tell ggplot precisely what variables (columns) should be plotted. These are the plot `aesthetics` (aes):
+
+
+
+# Although we've specified the axes, ggplot doesn't know what style of plot to create. To plot on these axes, we must supply a "geometric object layer" (geom) to create - in this case, a "scatter plot object" using `geom_point`.
+
+
+
+# Note the `+` operator above; when you're working with `ggplot` layers (e.g., "geoms"), we connect them using `+`.
+# The only remaining element missing from our plot is to color the points by "Species". To do this, we simply need to add another `aes`!
+
+
+```
+
+You've reproduced the plot! Reproducibility is very important to science, and if you choose to continue in biology you'll likely encounter studies which make their plotting code (and data-generation code) publicly available for complete transparency.
+
+In the example above, you encountered the typical format for plotting with `ggplot`. There are many permutations of the plotting procedure above (we'll cover a few more below), but I'll summarize the most common steps in order below:
+
+1.  Initialize a `ggplot` object using `ggplot` which takes two ***arguments:***
+    a.  `data = <data frame>`: ***data frame*** containing values/variables to be plotted
+    b.  `mapping = aes(<mappings>)`: ***name-value pairs*** (`aes`) of what should be plotted (e.g., `aes(x=Var1,y=Var2)`)
+2.  Specify first plotting layer (i.e., the type of "geometric object" or `geom`)
+3.  Specify additional layers (e.g., cosmetics, labels, and/or additional plots)
+
+Let's continue plotting using the same underlying data:
+
+```{r}
+
+# Add a trend line for each category
+
+
+
+# Change aes labels
+
+
+
+# Change theme
+
+
+```
+
+This example highlights the modularity of plotting data with `ggplot2`. In the examples above, we added lines to the pre-existing plotting code to change the output according to our intentions. This process of iterating on a plot isn't a contrived example either - this is commonly how plots are developed in `R`!
+
+Before we move on, let's review and practice what we've learned so far in the following exercise:
+
+```{r}
+
+df <- iris
+
+#   1. For both "Sepals" and "Petals", add columns (using `mutate()`) that compute the "sepal" and "petal" area (length * width).
+#   2. Create a plot with the following features:
+#     a. x-axis is "Petal Area"
+#     b. y-axis is "Sepal Area"
+#     c. First geom layer is a trend line (use `method = "lm"` as an argument)
+#     d. Second geom layer is a scatter plot
+
+# How would you describe the trend in your data? Does this trend change when you color by `Species`?
+```
+
+As with all coding, your comfort with plotting in `R` will improve as you spend time with it. Just as you processed the data above to identify trends in flower anatomy, these same principles are widely applicable to a variety of sciences.
+
+In the example above, we plotted the relationship between ***continuous variables*** (e.g., "Petal Width" and "Petal Length") using a curve (`geom_smooth()`) overlaid onto a scatter plot (`geom_point`). In the next section, we'll discuss and practice additional plot types that are better used for other formats of data.
+
+------------------------------------------------------------------------
+
+Variables are used to describe two major categories of data:
+
+1.  **Continuous** - A variable that can be described along a continuum of quantitative values (e.g., `1:100`)
+2.  **Categorical** - A variable with a discrete number of values (e.g., "Tall/Short")
+
+In the example plot (copied again below), we plotted two ***continuous variable*** (on the axes) as well as a single ***categorical variable*** (color). This works well for these data, as it allows us to visualize the relationship between the ***continuous variables*** while simultaneously grouping species by color.
+
+![](iris_plot_example.png)
+
+While the plot above is sufficient for capturing the trend in petal area across all three species, lets take a step back and take a look at some other common plots for ***exploring*** our data and introduce some additional plotting tips/tricks:
+
+```{r}
+
+# Load data
+df <- iris
+
+# Add a column for petal area
+df <- df %>% 
+  mutate(petal_area = Petal.Length * Petal.Width)
+
+# HISTOGRAM: Visualize a single continuous variable
+
+ggplot(data = df,
+       mapping = aes(x=petal_area)) +
+  geom_histogram(binwidth = 1) + # What happens if you change the binwidth value?
+  theme_classic()
+
+ggplot(data = df,
+       mapping = aes(x=petal_area)) +
+  geom_histogram(binwidth = 1) + 
+  facet_wrap(~Species,nrow=3) + # `facet_wrap` allows us to split our plot into panels
+  theme_classic()
+
+```
+
+***Histograms*** are a valuable plotting format, as they allow you to visualize a distribution of values associated with a single variable. In particular, plotting a ***histogram*** can help you identify trends that can be used to inform future analyses. ***Histograms*** can also be used to directly describe your data; for example, two peaks in a ***histogram*** may suggest you're sampling from two distinct populations.
+
+```{r}
+# BOX PLOTS & VIOLIN PLOTS: Visualizing the distribution of a continuous variable for each level in a categorical variable
+
+## BOX PLOT
+ggplot(data = df,
+       mapping = aes(x=Species,y=petal_area,fill=Species)) +
+  geom_boxplot() +
+  theme_classic() +
+  theme(legend.position="none")
+
+## VIOLIN PLOT
+ggplot(data = df,
+       mapping = aes(x=Species,y=petal_area,fill=Species)) +
+  geom_violin() +
+  theme_classic() +
+  theme(legend.position="none")
+
+```
+
+***Box plots*** and ***violin plots*** are used to visualize distributions *within* categories of data. Whereas a ***violin plot*** can be thought of as a ***histogram*** that has been turned onto its side and mirrored, a ***box plot*** captures summaries of data (by default, quartiles). These are often plotted overlaid together, so lets look at an example of that:
+
+```{r}
+## COMBINED (with some modifications for clarity)
+ggplot(data = df,
+       mapping = aes(x=Species,y=petal_area,fill=Species)) +
+  geom_violin(width = 1) +
+  geom_boxplot(fill="white",width=0.025) +
+  theme_classic() +
+  theme(legend.position="none")
+```
+
+We've only scratched the surface of plotting with `ggplot2`; if you'd like a resource to help guide you through producing a specific plot, take a look at their [cheatsheet](https://ggplot2.tidyverse.org/). As a reminder, we don't expect you to memorize all these tools and commands, but rather become sufficiently aware of their existence and how they can be used in data analysis. In fact, leveraging online resources is common throughout an entire career of data science. The best way to learn `R` coding procedures and plotting methods is to analyse your own data (or re-purpose previously generated data)!
+
+We'll close out this lesson with a plotting exercise. I'll provide a ***function key*** below (as a reminder, you can use the `help()` ***function*** for more details)**:**
+
+-   `ggplot(data = <data frame>, mapping = aes(<mappings>))`
+
+    -   Common `aes` options: `x, y, color, fill`
+
+-   `geom_histogram()`
+
+    -   Common arguments: `binwidth=<int>`, `bins=<int>`
+
+-   `geom_point()`
+
+-   `geom_smooth(method="lm")`
+
+-   `geom_boxplot()`
+
+-   `geom_violin()`
+
+-   `facet_wrap(~<variable>)`
+
+    -   Common arguments: `ncol=<int>`,`nrow=<int>`
+
+-   Common themes: `theme_minimal()`,`theme_classic()`,`theme_bw()`
+
+```{r}
+
+# LOAD DATA FOR EXERCISE
+df <- mpg # You can use `?mpg` to learn more about the data set
+
+# USING THESE DATA, DO THE FOLLOWING:
+#   1. Familiarize yourself with the data (which variables are continuous/categorical?)
+#   2. Plot a histogram of `cyl` (what is the most common number of cylinders?)
+#   3. Using mutate, compute the mean 'miles per gallon' using the `cty` and `hwy` variables and store your mutated data frame to an object for the subsequent tasks.
+#   4. Create a box plot capturing your mean "mpg" for each manufacturer (which manufacturer has the highest mean mpg?)
+#   5. Facetting by `class`, plot `displ` against your `mpg` and add a trend line (do any trends stand out?)
+
+```
+
+This example served as an opportunity to explore trends that are captured in our data. In addition to practicing `tidyverse` and plotting skills, this also serves as an example of strong data collection procedures and emergent trends. In the next lesson, we'll apply everything we've learned to real biological data - exploring common plots in genetics.
+
+For further reading on plotting in `ggplot2`, please see Chapters 9-11 in [R for Data Science (2e)](https://r4ds.hadley.nz/visualize).
