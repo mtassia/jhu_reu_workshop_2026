@@ -243,7 +243,7 @@ df<-tibble(iris)
 
 Now that we're set up, let's try and recreate the following plot that was generated using `ggplot` and the `iris` data set:
 
-![](iris_plot_example.png)
+![Iris plot example](data/iris_plot_example.png)
 
 First, we need to know precisely *what* is being plotted with `ggplot()`. Though there are many cosmetic elements to the plot above, the data being plotted can be summarized as the following:
 
