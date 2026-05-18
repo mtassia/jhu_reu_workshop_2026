@@ -185,11 +185,13 @@ example_vec <- c("Michael","Arjun","Margaret",
                  "Michael")
 example_vec
 
+```
+
+```{r}
 ## 1.2 Create an integer vector
 example_vec <- c(2,4,6,8,10,12,14,16,18,20) # 2:20 by steps of 2
 example_vec <- seq(2,20,2) # 2:20 by steps of 2; use ?seq to see this function's arguments
 c(2,4,6,8,10,12,14,16,18,20) == seq(2,20,2) # Test whether each element of each vector is the same
-
 ```
 
 Using the `example_vec` created above, let's practice some common ways to work with ***vectors***. Note that the examples below also apply to other types of vectors (e.g., character vectors, logical vectors).
