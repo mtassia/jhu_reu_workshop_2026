@@ -13,19 +13,19 @@ We will cover a few key subjects:
 
 1.  Introduction to `tidyverse` (installation, loading, and documentation)
 2.  Using `tidyverse` to *tidy* pre-existing data
-3.  Visualize our data
+3.  Visualize our data with `ggplot`
 
-The contents of today's lesson will follow closely with those detailed in Chapters 3, 5, and 9 of [`R for Data Science`](https://r4ds.hadley.nz/layers). In the final lesson of this workshop, we'll apply what we've learned to some biological/genetic data you're likely to encounter during a career in biology.
+The contents of today's lesson will follow closely with those detailed in Chapters 3, 5, and 9 of [`R for Data Science`](https://r4ds.hadley.nz/layers).
 
 ------------------------------------------------------------------------
 
 ### 1. `tidyverse` grammar
 
-In the previous lesson, we learned about loading ***packages*** that were available to R by default upon installation. However, one of the strengths of R (whether it's R or another language) is access to a huge collection of ***packages*** purpose-built to help analyze your data.
+In the previous lesson, we learned about loading ***packages*** that were available to R by default upon installation. However, one of the strengths of R is access to a huge collection of ***packages*** purpose-built to help analyze your data.
 
 #### 1.1 Download and installing `tidyverse`
 
-Often there will be packages that you'd like to use for your analyses, but you don't have them downloaded and available to R. Fortunately, there are several packages (some available in base R) that can be used to download, install, and load the packages into your environment. Below, we'll download, install, and load `tidyverse`:
+Often there will be packages that you'd like to use for your analyses, but you don't have them downloaded or installed to R. Fortunately, there are several packages (some available in base R) that can be used to download, install, and load the packages into your environment. Below, we'll download, install, and load `tidyverse`:
 
 ```{r, results=FALSE, message=FALSE, warning=FALSE}
 
@@ -64,8 +64,6 @@ df <- as.data.frame(billboard) # Load the `billboard` data into a data frame obj
 #   3. Print only lines where the artist was "Eminem"
 
 ```
-
-Using only the base ***functions*** of R to perform the tasks above can be a bit cumbersome (though nonetheless very powerful).
 
 ##### 1.2.2 Dataframes with `tidyverse`
 
@@ -150,7 +148,7 @@ df
 
 ```
 
-In the last example, we took a "wide" ***data frame*** (I'll refer to anything structured like a ***data frame*** as a ***data frame***, even if it's a ***tibble*** for simplicity) and made it "longer". This is a common transformation step in data science, as sometimes it's easier to record data (particularly dated events) using a wide format. However, because we can capture all the *week* columns using a single *week* variable, we rearranged our data to fit this structure. We can also "pivot wider", but you won't see this during this workshop.
+In the last example, we took a "wide" ***data frame*** and made it "longer". This is a common transformation step in data science, as sometimes it's easier to record data (particularly dated events) using a wide format. However, because we can capture all the *week* columns using a single *week* variable, we rearranged our data to fit this structure. We can also "pivot wider", but you won't see this during this workshop.
 
 Let's introduce a few more functions using the `iris` data set, then work through an example:
 
@@ -190,8 +188,8 @@ df %>%
 # Perform functions on a group of observations
 
 df %>% 
-  summarise(PA.mean = mean(Petal.Area), # Compute the mean of Petal.Area
-            SA.mean = mean(Sepal.Area), # Compute the mean of Sepal.Area
+  summarise(PA.mean = mean(Petal.Area, na.rm = TRUE), # Compute the mean of Petal.Area
+            SA.mean = mean(Sepal.Area, na.rm = TRUE), # Compute the mean of Sepal.Area
             .by = Species) # Compute means per unique value in the Species column
 
 ```
@@ -214,7 +212,7 @@ Now, let's work through an example. As the list of functions you've encountered 
 ```{r}
 
 # First, we'll load the data:
-df<-starwars
+df <- starwars
 
 # With these data, do the following (using the output from each step as input for the next):
 #   1. Subset to: name, height, mass, homeworld, species
@@ -260,7 +258,7 @@ df <- tibble(iris)
 
 Now that we're set up, let's try and recreate the following plot that was generated using `ggplot` and the `iris` data set:
 
-![Iris plot example](data/iris_plot_example.png)
+![](data/iris_plot_example.png)
 
 First, we need to know precisely *what* is being plotted with `ggplot()`. Though there are many cosmetic elements to the plot above, the data being plotted can be summarized as the following:
 
@@ -272,36 +270,49 @@ First, we need to know precisely *what* is being plotted with `ggplot()`. Though
 **Next, let's walk through the syntax of plotting with `ggplot`**.
 
 ```{r}
-
 # Create a `ggplot` object
-
-
-
-# By itself, this function doesn't appear do much (or anything). However, behind the scenes it has prepared the data for plotting. To see this, we can use the `glimpse()` function. Let's compare the data before and after `ggplot()` has transformed it:
-
-
-
-# In addition to preparing the underlying data, we also need to tell ggplot precisely what variables (columns) should be plotted. These are the plot `aesthetics` (aes):
-
-
-
-# Although we've specified the axes, ggplot doesn't know what style of plot to create. To plot on these axes, we must supply a "geometric object layer" (geom) to create - in this case, a "scatter plot object" using `geom_point`.
-
-
-
-# Note the `+` operator above; when you're working with `ggplot` layers (e.g., "geoms"), we connect them using `+`.
-# The only remaining element missing from our plot is to color the points by "Species". To do this, we simply need to add another `aes`!
-
-
+ggplot(data = df)
 ```
 
-You've reproduced the plot! Reproducibility is very important to science, and if you choose to continue in biology you'll likely encounter studies which make their plotting code (and data-generation code) publicly available for complete transparency.
+By itself, this function doesn't appear do much (or anything). However, behind the scenes it has prepared the data for plotting. To see this, we can use the `glimpse()` function. Let's compare the data before and after `ggplot()` has transformed it:
+
+```{r}
+glimpse(df) # Glimpse df before ggplot()
+ggplot(data = df) %>% glimpse() # Glimpse df after ggplot()
+```
+
+In addition to preparing the underlying data, we also need to tell ggplot precisely what variables (columns) should be plotted. These are the plot mappings, or `aesthetics` (aes). We also have to tell ggplot what style of plot to create (e.g., scatter plot, line plot, box plot, etc.).
+
+To plot these aesthetics, we need to add a "geometric object layer" (geom) to our plot. Geoms are the visual elements of a plot (e.g., points, lines, boxes, etc.) that represent the data. In this case, we want to create a scatter plot, which uses `geom_point()`.
+
+```{r}
+ggplot(data = df,
+       mapping = aes(x = Petal.Width,
+                     y = Petal.Length)) +
+  geom_point()
+```
+
+Note the `+` operator above; when you're working with `ggplot` plotting functions (e.g., "geoms"), we connect them using `+`.
+
+The only remaining element missing from our plot is to color the points by "Species". To do this, we simply need to add another `aes`! To know what aesthetics are available to `geom_point()`, take a look at the function's documentation!
+
+```{r}
+ggplot(data = df,
+       mapping = aes(x = Petal.Width, 
+                     y = Petal.Length, 
+                     color = Species)) +
+  geom_point()
+```
+
+***You've reproduced the plot!***
+
+Reproducibility is very important to science, and if you choose to continue in biology you'll likely encounter studies which make their plotting code (and data-generation code) publicly available for complete transparency.
 
 In the example above, you encountered the typical format for plotting with `ggplot`. There are many permutations of the plotting procedure above (we'll cover a few more below), but I'll summarize the most common steps in order below:
 
 1.  Initialize a `ggplot` object using `ggplot` which takes two ***arguments:***
     a.  `data = <data frame>`: ***data frame*** containing values/variables to be plotted
-    b.  `mapping = aes(<mappings>)`: ***name-value pairs*** (`aes`) of what should be plotted (e.g., `aes(x=Var1,y=Var2)`)
+    b.  `mapping = aes(<mappings>)`: ***name-value pairs*** (`aes`) of what should be plotted (e.g., `aes(x = Var1,y = Var2)`)
 2.  Specify first plotting layer (i.e., the type of "geometric object" or `geom`)
 3.  Specify additional layers (e.g., cosmetics, labels, and/or additional plots)
 
@@ -312,16 +323,37 @@ Let's continue plotting using the same underlying data:
 ```{r}
 
 # Add a trend line for each category
+ggplot(data = df,
+       mapping = aes(x = Petal.Width,
+                     y = Petal.Length,
+                     color = Species)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              formula = y ~ x)
+```
 
+Note that the trend line is added as a second layer on the plot *above* the scatter plot layer. This means that the points are plotted first, and then the trend line is plotted on top of the points. If we were to reverse the order of the layers, the trend line would be plotted first, and then the points would be plotted on top of the trend line! This is an important feature of `ggplot` - the order of the layers can impact the readability of the plot!
 
+We also supplied the `method = "lm"` argument to `geom_smooth()`, which tells `ggplot` to fit a linear model to the data. We'll discuss linear models in a bit more detail in the next lesson.
 
-# Change aes labels
+Finally lets change some of the plotting labels and theme to make the plot more aesthetically pleasing:
 
+```{r}
+# Save plot as an object
+g <- ggplot(data = df,
+            mapping = aes(x = Petal.Width,
+                          y = Petal.Length,
+                          color = Species)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              formula = y ~ x)
 
-
-# Change theme
-
-
+# Change labels and theme
+g +
+  labs(x = "petal width (cm)",
+       y = "petal length (cm)",
+       color = "species") +
+  theme_minimal()
 ```
 
 This example highlights the modularity of plotting data with `ggplot2`. In the examples above, we added lines to the pre-existing plotting code to change the output according to our intentions. This process of iterating on a plot isn't a contrived example either - this is commonly how plots are developed in R!
@@ -355,11 +387,11 @@ Variables are used to describe two major categories of data:
 1.  **Continuous** - A variable that can be described along a continuum of quantitative values (e.g., `1:100`)
 2.  **Categorical** - A variable with a discrete number of values (e.g., "Tall/Short")
 
-In the example plot (copied again below), we plotted two ***continuous variable*** (on the axes) as well as a single ***categorical variable*** (color). This works well for these data, as it allows us to visualize the relationship between the ***continuous variables*** while simultaneously grouping species by color.
+In the example above, we plotted two ***continuous variables*** (*x* and *y*) as well as a single ***categorical variable*** (*color*). This plotting style works well for these data, as it allows us to visualize the relationship between the ***continuous variables*** while simultaneously grouping species by color. However, scatter plots are not the only plotting format available to us, and in some cases, other plotting formats may be more appropriate for visualizing our data.
 
-![](iris_plot_example.png)
+Lets take a step back and take a look at some other common plots for ***exploring*** our data and introduce some additional plotting tips/tricks.
 
-While the plot above is sufficient for capturing the trend in petal area across all three species, lets take a step back and take a look at some other common plots for ***exploring*** our data and introduce some additional plotting tips/tricks:
+##### 2.4.1 Histograms
 
 ```{r}
 
@@ -375,11 +407,6 @@ df <- df %>%
 ggplot(data = df,
        mapping = aes(x=petal_area)) +
   geom_histogram(binwidth = 1) + # What happens if you change the binwidth value?
-  theme_classic()
-
-ggplot(data = df,
-       mapping = aes(x=petal_area)) +
-  geom_histogram(binwidth = 1) + 
   facet_wrap(~Species,nrow=3) + # `facet_wrap` allows us to split our plot into panels
   theme_classic()
 
@@ -387,38 +414,44 @@ ggplot(data = df,
 
 ***Histograms*** are a valuable plotting format, as they allow you to visualize a distribution of values associated with a single variable. In particular, plotting a ***histogram*** can help you identify trends that can be used to inform future analyses. ***Histograms*** can also be used to directly describe your data; for example, two peaks in a ***histogram*** may suggest you're sampling from two distinct populations.
 
-```{r}
-# BOX PLOTS & VIOLIN PLOTS: Visualizing the distribution of a continuous variable for each level in a categorical variable
+##### 2.4.2 Box plots and violin plots
 
+***Box plots*** and ***violin plots*** are used to visualize distributions *within* categories of data. Whereas a ***violin plot*** can be thought of as a ***histogram*** that has been turned onto its side and mirrored, a ***box plot*** captures summaries of data (by default, quartiles). These are often plotted overlaid together, so lets look at an example of that:
+
+```{r}
 ## BOX PLOT
 ggplot(data = df,
        mapping = aes(x=Species,y=petal_area,fill=Species)) +
   geom_boxplot() +
   theme_classic() +
   theme(legend.position="none")
+```
 
+```{r}
 ## VIOLIN PLOT
 ggplot(data = df,
        mapping = aes(x=Species,y=petal_area,fill=Species)) +
   geom_violin() +
   theme_classic() +
   theme(legend.position="none")
-
 ```
-
-***Box plots*** and ***violin plots*** are used to visualize distributions *within* categories of data. Whereas a ***violin plot*** can be thought of as a ***histogram*** that has been turned onto its side and mirrored, a ***box plot*** captures summaries of data (by default, quartiles). These are often plotted overlaid together, so lets look at an example of that:
 
 ```{r}
 ## COMBINED (with some modifications for clarity)
 ggplot(data = df,
        mapping = aes(x=Species,y=petal_area,fill=Species)) +
   geom_violin(width = 1) +
-  geom_boxplot(fill="white",width=0.025) +
+  geom_boxplot(fill="white",
+               width = 0.025) +
   theme_classic() +
   theme(legend.position="none")
 ```
 
+#### 2.5 `ggplot2` summary
+
 We've only scratched the surface of plotting with `ggplot2`; if you'd like a resource to help guide you through producing a specific plot, take a look at their [cheatsheet](https://ggplot2.tidyverse.org/). As a reminder, we don't expect you to memorize all these tools and commands, but rather become sufficiently aware of their existence and how they can be used in data analysis. In fact, leveraging online resources is common throughout an entire career of data science. The best way to learn R coding procedures and plotting methods is to analyse your own data (or re-purpose previously generated data)!
+
+### 3. Exercise
 
 We'll close out this lesson with a plotting exercise. I'll provide a ***function key*** below (as a reminder, you can use the `help()` ***function*** for more details)**:**
 
@@ -428,7 +461,7 @@ We'll close out this lesson with a plotting exercise. I'll provide a ***function
 
 -   `geom_histogram()`
 
-    -   Common arguments: `binwidth=<int>`, `bins=<int>`
+    -   Common arguments: `binwidth = <int>`, `bins = <int>`
 
 -   `geom_point()`
 
@@ -440,7 +473,7 @@ We'll close out this lesson with a plotting exercise. I'll provide a ***function
 
 -   `facet_wrap(~<variable>)`
 
-    -   Common arguments: `ncol=<int>`,`nrow=<int>`
+    -   Common arguments: `ncol = <int>`,`nrow = <int>`
 
 -   Common themes: `theme_minimal()`,`theme_classic()`,`theme_bw()`
 
@@ -460,6 +493,6 @@ df <- mpg # You can use `?mpg` to learn more about the data set
 
 This example served as an opportunity to explore trends that are captured in our data. In addition to practicing `tidyverse` and plotting skills, this also serves as an example of strong data collection procedures and emergent trends. In the next lesson, we'll apply everything we've learned to real biological data - exploring common plots in genetics.
 
-### 3. Recommended reading
+### 4. Recommended reading
 
 For further reading on plotting in `ggplot2`, please see Chapters 9-11 in [R for Data Science (2e)](https://r4ds.hadley.nz/visualize).

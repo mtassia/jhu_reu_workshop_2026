@@ -1,0 +1,165 @@
+---
+title: "04_Biological_Data"
+author: "Michael Tassia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## JHU Biology REU 2024 - Probability and statistics
+
+Today's lesson will focus on some basic concepts in ***probability*** and ***statistics***, which are essential for analyzing biological data and reaching reproducible conclusions, and how to implement these concepts/techniques in R. ***Statistics*** are fundamental component of science, providing a quantitative framework for analyzing data, testing hypotheses, and drawing conclusions. In biology, we often work with quite messy data, and statistics help us distinguish *signal* from *noise*, identify patterns, and make informed conclusions based on our data.
+
+We will cover the following topics:
+
+-   Normal probability distribution
+
+-   Hypothesis testing (*t*-test)
+
+-   Regression
+
+We will only cover the basics here, focusing on flexible methods that are applicable across biological disciplines. For more in-depth knowledge on these subjects, I recommend reading [*Introduction to Statistical Learning*](https://www.statlearning.com/) by Gareth James, Daniela Witten, Trevor Hastie, and Robert Tibshirani.
+
+------------------------------------------------------------------------
+
+### 1. The normal distribution
+
+There are many ***probability*** distributions that can be used to model different types of data. We won't be going deeply into the mathematical details of these distributions, but if you'd like to know more, take a look at [this website](https://www.acsu.buffalo.edu/~adamcunn/probability/probability.html) hosted by Adam Cunningham at the University of Buffalo.
+
+One of the most common distributions used in biology is the ***normal distribution***, which is often used to model continuous data that are expected to be symmetrically distributed around a mean. The normal (or Gaussian) distribution is the classic "bell curve". For example, a common null hypothesis in biology is that morphometric traits (e.g., height or weight) is normally distributed.
+
+![](data/normal_0_1.png)
+
+In the plot above, the x-axis captures the distribution of random observations and the y-axis describes the probability of observing a particular value -- this is the probability density function (PDF) of the normal distribution. We can use this information to ask questions about our data. For example, we can ask: "What is the probability of observing a value greater than or equal to 1.0?" We will address this type of question below.
+
+#### 1.1 The normal distribution parameters
+
+The ***normal distribution*** is defined by two parameters:
+
+-   The **mean** ($\mu$), which represents the average value of the distribution.
+
+-   The **standard deviation** ($\sigma$), which represents the spread of the distribution around the mean.
+
+Shorthand, you may see the normal distribution represented as $N(\mu, \sigma^2)$, where $\sigma^2$ is the variance (the square of the standard deviation).
+
+In R, we can use the `rnorm()` function to generate random values from the normal distribution. As always, you can use `?rnorm` to learn more about this function. Below, we'll generate 1000 random values from $N(\mu = 0, \sigma^2 = 1)$ and plot the distribution as a histogram:
+
+```{r}
+
+# Load necessary libraries
+library(tidyverse)
+
+# Set seed for reproducibility
+set.seed(420)
+
+# Generate 1000 random values from a normal distribution
+dat <- rnorm(n = 1000,
+             mean = 0,
+             sd = 1)
+
+# Plot our data
+tibble(dat) %>%
+  ggplot(mapping = aes(x = dat)) +
+  geom_histogram(bins = 100) +
+  theme_minimal() +
+  labs(x = "value")
+```
+
+Qualitatively, this distribution *looks* normal, and while there are formal test for normality (e.g., Shapiro-Wilk test), visual inspection is sufficient here. But how do we use the normal distribution to make *inferences* about our data? To address this question, let's return to the `iris` data set.
+
+#### 1.2 Calculating probability from the normal distribution
+
+Imagine that we have an incomplete record of $x = 4.0 cm$ associated with the `Petal.Length` variable, but no information on which of the species it belonged to. We want to calculate the probability of observing the value of $x$ for this incomplete record in each species, then ask, "Which species did this incomplete record come from?"
+
+To do this, we will use the `qnorm()` function to calculate the probability of observing a value $x = 4.0$ for each species:
+
+```{r}
+# Load the iris data set and set our value of x
+df <- iris
+x <- 4.0
+
+# Calculate the mean and standard deviation of Petal.Length for each species
+prob.df <- df %>%
+  group_by(Species) %>%
+  summarise(mean = mean(Petal.Length),
+            sd = sd(Petal.Length))
+
+# Calculate the probability of observing a value x for each species
+prob.df <- prob.df %>%
+  mutate(prob = dnorm(x, mean = mean, sd = sd) %>%
+           round(digits = 3))
+
+prob.df
+```
+
+From the values above, we can see that the probability of observing $x = 4.0cm$ is the highest for the *versicolor* species ($p(x) = 0.728$). While there are more formal methods for classifying samples (e.g., logistic regression, or linear discriminant analysis), this relatively simple example illustrates how we can use the normal distribution to provide quantitative answers to questions about our data.
+
+#### 1.3 Practice with the normal distribution
+
+Below, we'll simulate body weight measurements for [domestic cats](https://avmajournals.avma.org/view/journals/javma/255/2/javma.255.2.205.xml) and ask the question, "What is the probability of observing a 6kg cat?"
+
+```{r}
+set.seed(150)
+
+# 1. Simulate 1000 cat weights with a mean of 4.93 and a standard deviation of 1.4
+# 2. Calculate the probability of observing a cat that weighs ≥ 6.0kg
+# 3. Plot the distribution of simulated cat weights as a histogram and add a vertical line at 6.0kg (using `geom_vline(xintercept = 6.0)`)
+
+```
+
+### 2. Hypothesis testing
+
+**Hypotheses** are statements that describe a phenomenon/observation, and a good hypothesis should be testable, falsifiable, and specific.
+
+For example:
+
+-   "*The genetic variant at locus X is associated with an increased risk of skin cancer.*"
+
+-   "*The mean body weight of cats is less than 10kg.*"
+
+-   "*The leaves of plant species A are longer than plan species B.*"
+
+Developing a simple and elegant hypothesis takes practice and is a critical step to the scientific process (whether it's during experimental design or writing grant proposals, you'll encounter hypothesis development frequently).
+
+There are many different statistics that can be used for hypothesis testing, and plenty of guidance on which tests are appropriate for the questions you're trying to answer (see [this article](https://statsandr.com/blog/what-statistical-test-should-i-do/) by Antoine Soetewey for an overview). Here, we'll focus on one of the most common tests: the ***t*****-test**.
+
+#### 2.1 Performing a t-test
+
+##### 2.1.1 The Palmer Penguins data set
+
+The ***t*****-test** is a statistical test used to compare the means of two groups. To get an intuition for what a *t*-test specifically tests, let's simulate some data using a new biological dataset: `palmerpenguins`.
+
+```{r}
+install.packages("palmerpenguins", quiet = TRUE)
+library(palmerpenguins)
+
+df <- penguins
+head(df)
+```
+
+Much like ***functions***, data sets that are distributed as R packages can also have documentation. Try running `?penguins` to learn more about this data set.
+
+Next, let's subset our data and plot the distributions of body mass for two species of penguin: *Adelie* and *Gentoo*. Note the use of the `%in%` operator in the `filter()` function below. This operator allows us to filter for multiple values in a single column -- specifically testing whether the value in the `species` column is contained in the vector `c("Adelie", "Gentoo")`.
+
+```{r}
+
+# Create plot
+g <- df %>% 
+  filter(species %in% c("Adelie", "Gentoo"),
+         !is.na(body_mass_g)) %>%
+  ggplot(mapping = aes(x = body_mass_g, fill = species)) +
+  geom_histogram(binwidth = 100, alpha = 0.5, position = "identity") +
+  theme_minimal() +
+  labs(x = "body mass (g)",
+       y = "number of penguins",
+       fill = "species")
+
+# Print plot
+g
+
+```
+
+From the plot above, we *qualitatively* observe that these two penguin species likely possess two distinct mass distributions, with *Gentoo* penguins being heavier than *Adelie* penguins. But how can we *quantify* this observation? This is where the *t*-test comes in.
+
+##### 2.1.2 Student's t-test for body mass
+
+The Student's *t*-test allows us to test the ***null hypothesis*** that the two groups possess equal means. Thus, the ***alternative hypothesis*** is that the two groups possess different means. While we won't go into the details of the *t*-test formula or assumptions here, you can learn more about them in Danielle Navarro's [`Learning Statistics in R`](https://learningstatisticswithr.com/).
