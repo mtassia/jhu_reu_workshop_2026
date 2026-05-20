@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-## JHU Biology REU 2024 - Analyzing and visualizing data in genetics
+## JHU Biology REU 2026 - Analyzing and visualizing data in genetics
 
 In this lesson, we'll continue practicing with `tidyverse` tools to visualize common genetic data formats. Figure reproduction using diverse data sets serves as valuable practice with data literacy and familiarity with `R`.
 
