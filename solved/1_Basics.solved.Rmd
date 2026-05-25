@@ -22,7 +22,7 @@ Here, we'll begin by becoming familiar with the ***syntax*** of `R` (*how we int
 
 ------------------------------------------------------------------------
 
-## 1. The R syntax
+### 1. The R syntax
 
 To begin, we'll work through some examples of how to run code in R. Below, you'll find code blocks that you can run in your R environment. Some of these code blocks are empty -- that's intentional! You can fill in the blanks to practice the concepts covered in this workshop. Each code block will begin with a string like, `{r, ...}`, which tells R that the code within the block should be treated as R code. *You do not need to interact with this line!*
 
@@ -35,7 +35,7 @@ Some important keyboard shortcuts:
 
 Within the code blocks, you'll frequently see the `#` character. `#` tells R (as well as most other common programming languages) to ignore the rest of the line. This is a common way to add *comments* to your code -- describing what the code is doing, what the output means, or as guidance for your own workflow. For example, lets use the following intuitive code block to demonstrate how comments work:
 
-```{r, message = FALSE}
+```{r}
 
 1 + 1 # Add 1 and 1 together
 
@@ -43,25 +43,53 @@ Within the code blocks, you'll frequently see the `#` character. `#` tells R (as
 
 When running the code block above, you'll see that the output is `2` and the comment is ignored. Without the `#` character, the code block above will produce an error. We will use comments throughout this workshop to describe what the code is doing or provide instruction -- feel free to add your own comments too!
 
-### 1.1 Operators
+#### 1.1 Operators
 
-#### 1.1.1 Arithmetic, comparisons, creating vectors, and storing data
+##### 1.1.1 Arithmetic, comparisons, creating vectors, and storing data
 
 Here, we'll practice giving commands to R using common mathematical operators. A ***command*** is a line of code that tells `R` to perform some action on ***objects***. Let's apply some arithmetic ***operators*** to some ***integers*** below:
 
-```{r, message = FALSE}
+###### Basic arithmetic
 
-# Basic arithmetic
+```{r}
 
 10 + 5 # `+` sums
+
+```
+
+```{r}
+
 10 - 5 # `-` subtracts
+
+```
+
+```{r}
+
 10 / 5 # `/` divides
+
+```
+
+```{r}
+
 10 * 5 # `*` multiplies
+
+```
+
+```{r}
+
 10 ^ 5 # `^` exponentiate
 
-# "Complex" arithmetic (follows PEMDAS)
+```
+
+###### "Complex" arithmetic (follows PEMDAS)
+
+```{r}
 
 10 + 5 - 10 * 5 # multiplication applied first
+
+```
+
+```{r}
 10 + (5 - 10) * 5 # parenthetical applied first
 
 ```
@@ -72,24 +100,56 @@ In the code block above, we used ***operators*** (i.e., `+`, `-`, `/`, `*`, `^`)
 2.  *Creating vectors* using the `:` operator between two integers (e.g., `1:100` creates a vector of integers from 1 to 100, inclusive).
 3.  *Storing data* using the `<-` operator (e.g., `example_integer <- 10` stores the integer `10` in the object `example_integer`).
 
-```{r, message = FALSE}
+###### Comparisons
 
-# 1. Comparisons
+```{r}
 
 10 > 5 # Greater than
+
+```
+
+```{r}
+
 10 >= 5 # Greater than or equal to
+
+```
+
+```{r}
+
 10 == 5 # Equal to
+
+```
+
+```{r}
+
 10 != 5 # Not equal to
 
-# 2. Creating vectors
+```
+
+###### Creating vectors
+
+```{r}
 
 1:100 # Create a vector of all integers between (and including) 1 and 100
+
+```
+
+```{r}
+
 5*(1:100) # Arithmetic operators can be applied to integer series
 
-# 3. Storing data
+```
+
+###### Storing data
+
+```{r}
 
 example_integer <- 10 # Save 10, an integer object, to the object `example_integer`
 example_integer # Call the object `example_integer` to see its value
+
+```
+
+```{r}
 
 example_integer <- 10 * example_integer # Multiple the value of `example_integer` by 10 and store it in `example_integer`
 example_integer # Call the object `example_integer` to see its new value
@@ -107,31 +167,40 @@ Importantly, it's recommended that you name objects intuitively, as they'll be i
 -   Capitol and lowercase letters are different (e.g., `example_integer` and `Example_integer` are two different objects)
 -   Be consistent with your typesetting (e.g., `example_integer` & `results_output`, `EXAMPLE_INTEGER` & `RESULTS_OUTPUT`, `ExampleInteger` & `ResultsOutput`)
 
-#### 1.1.2 Practice with operators {#practice-with-operators}
+##### 1.1.2 Practice with operators
 
 Now that we know the basics, let's practice using operators and objects with the following exercise. Below is a code block with tasks enumerated in comments. Try to fill in the blanks to complete the tasks (you can use the code above as a reference).
 
-```{r, message = FALSE}
+```{r}
 
 # 1. Create an object that stores all integers from 1 to 100
-  
-# 2. For each value in the series, multiply each element by the sum of 10 and <2 raised to the power of 4>
-  
-# 3. For each value in the series, divide by the product of 10 and 5
-  
-# 4. How many values are greater than or equal to 50?
+int_vec <- 1:100
 
-# 5. How many values in the object are less that 25?
+# 2. For each value in the series, multiply each element by the sum of 10 and <2 raised to the power of 4>
+int_vec <- int_vec * (10 + 2^4)  
+
+# 3. For each value in the series, divide by the product of 10 and 5
+int_vec <- int_vec / (10 * 5)
+
+# 4. How many values are greater than or equal to 50?
+int_vec >= 50
 
 ```
 
-### 1.2 Functions
+```{r}
+
+# 5. How many values in the object are less that 25?
+int_vec < 25
+
+```
+
+#### 1.2 Functions
 
 ***Functions*** are a type of object that store a series of commands. Function complexity ranges from simple tasks like computing a sum (i.e., `sum()`) to more complex statistical evaluations like performing linear regression (i.e., `lm()`). You can even write your own functions to perform specific tasks (we won't cover this here, but it's a powerful tool to have in your programming toolbox).
 
 Functions have the following syntax: `function(<arguments>)` . ***Arguments*** can be thought of as "options" supplied to the function; each function may take zero or more arguments. Examples of arguments include the input data (e.g., `data = 0:100`) and ignoring missing values (e.g., `na.rm = TRUE`). Let's look at an example of a couple functions below:
 
-```{r, message = FALSE}
+```{r}
 
 # Create a vector of integers from 1 to 100
 dat <- 1:100
@@ -139,8 +208,16 @@ dat <- 1:100
 # Obtain the maximum value in the vector
 max(dat)
 
+```
+
+```{r}
+
 # Obtain the minimum value in the vector
 min(dat)
+
+```
+
+```{r}
 
 # Print a basic summary of the vector
 summary(dat)
@@ -151,10 +228,14 @@ To learn more about a function, you can use the `help()` function to call the **
 
 Let's return to prompts in the [1.1.2 Practice with operators](#112-practice-with-operators) section above where we counted the number of values (stored in an object) that passed our test. Originally, we counted by eye; however, using `sum()`, we can quickly compute the number of values that pass our test. For example:
 
-```{r, message = FALSE}
+```{r}
 
 # Using sum() with a logical vector will add the total number of `TRUE` values:
 sum(1:50 > 25)
+
+```
+
+```{r}
 
 # Note that functions can also be nested, lets try an example below with `sqrt()` and `sum()`
 sum(sqrt(1:50) > 5)
@@ -171,30 +252,33 @@ Next, we'll highlight some common types of objects and how to manipulate them.
 
 ------------------------------------------------------------------------
 
-## 2. Common R objects - vectors and data frames
+### 2. Common R objects - vectors and data frames
 
-### 2.1 Vectors
+#### 2.1 Vectors
 
 We've already covered a few types of ***objects*** above (e.g., ***integers*** and ***functions***), so we'll begin with a object type we've already encountered: ***vectors***.
 
 In R, ***vectors*** contain a one-dimensional data. Previously, we created a ***vector*** of ***integers*** using the `:` operator and the bounding values (e.g., `1:100`). However, ***vectors*** can be made of many different types of data using the `c()` function.
 
-First, we'll create some vectors using the `c()` function:
+First, we'll create some vectors using the `c()` function.
 
-```{r, message = FALSE}
+##### 2.1.1 Creating vectors
 
-# 1. Creating vectors
-## 1.1 Create a character vector
+###### Character vectors
+
+```{r}
+
 example_vec <- c("Michael","Arjun","Margaret",
                  "Betty", "Josh", "Rajiv",
-                 "Michael")
+                 "Michael") # Note that this text wrapping is just for readibility
 example_vec
 
 ```
 
-```{r, message = FALSE}
+###### Integer vectors
 
-## 1.2 Create an integer vector
+```{r}
+
 example_vec <- c(2,4,6,8,10,12,14,16,18,20) # 2:20 by steps of 2
 example_vec <- seq(2,20,2) # 2:20 by steps of 2; use ?seq to see this function's arguments
 c(2,4,6,8,10,12,14,16,18,20) == seq(2,20,2) # Test whether each element of each vector is the same
@@ -203,27 +287,72 @@ c(2,4,6,8,10,12,14,16,18,20) == seq(2,20,2) # Test whether each element of each 
 
 Using the `example_vec` created above, let's practice some common ways to work with ***vectors***. Note that the examples below also apply to other types of vectors (e.g., character vectors, logical vectors).
 
-```{r, message = FALSE}
+##### 2.1.2 Common functions for vectors
 
-# 2. Common functions
+```{r}
+
 length(example_vec) # Return number of elements in vector
+
+```
+
+```{r}
+
 head(example_vec, n=5) # Show first 5 elements
+
+```
+
+```{r}
+
 tail(example_vec, n=5) # Show last 5 elements
 
-# 3. Accessing data
+```
+
+##### 2.1.3 Accessing vector data
+
+```{r}
+
 example_vec[1] # Access first element
+
+```
+
+```{r}
+
 example_vec[6] # Access sixth element
+
+```
+
+```{r}
+
 example_vec[length(example_vec)] # Access last element
+
+```
+
+```{r}
+
 example_vec[example_vec >= 12] # Access values > 12
 
-# 4. Editing data
+```
+
+##### 2.1.4 Editing vectors
+
+```{r}
+
 example_vec <- seq(0,100,5) # Create an integer vector containing 0-100 by steps of 5
+example_vec
+
+```
+
+```{r}
 
 example_vec[1] <- 10e6 # Replace the first value with 10e6
-example_vec <- c(example_vec,0) # Add 0 to the end of the vector
+example_vec <- c(example_vec, 0) # Add 0 to the end of the vector
 example_vec[2] <- NA # Replace the second value with NA
 example_vec[example_vec == 50] <- 500 # Replace any 50 with 500
 example_vec
+
+```
+
+```{r}
 
 # Complex example (what are we filtering for here?)
 example_vec[example_vec > 15 & example_vec <= 40 & !is.na(example_vec)]
@@ -232,42 +361,72 @@ example_vec[example_vec > 15 & example_vec <= 40 & !is.na(example_vec)]
 
 ***Vectors*** are commonly used to in R, so being familiar with how they can be filtered, accessed, and manipulated is very powerful. Though we've only scratched the surface here, we'll be using ***vectors*** frequently throughout this workshop and you'll likely encounter ***vectors*** if you perform data analysis in R.
 
-#### 2.1.1 Practice with vectors
+##### 2.1.5 Practice with vectors
 
 Let's try an exercise [*without*]{.underline} focusing on a ***vector*** of integers. Unlike integers (e.g., `1, 2, 3, 4, ...`), characters in R are specified by quotations around the string, such as `"salamander"`. Thus, `1` and `"1"` are entirely different objects.
 
 In this example, we'll specify the ***functions*** and ***arguments*** that can be used (remember, you can use `help(<function name>)` or `?<function name>` for documentation):
 
-```{r, message = FALSE}
+```{r}
 
-letters # Pre-existing vector of english letters
+set.seed(123) # Seeding ensures random numbers are the same each time you run this code
+letters # Pre-existing vector of English letters
 
 # 1. Use sample() to create a vector object with the following traits:
 #   - Contains 100 random samples from the `letters` object
 #   - Sample letters with replacement (each time you pick a letter, that letter needs to be able to be picked again)
 #   - NOTE: Store your object in a variable called something other than `letters`
 
+letters_sample <- sample(letters, size = 100, replace = TRUE)
+
 # 2. Using your vector object, perform the following tasks (in order):
 #   a. Count each letter that appears in your first name
+
+sum(sum(letters_sample == "m"),
+    sum(letters_sample == "i"),
+    sum(letters_sample == "c"),
+    sum(letters_sample == "h"),
+    sum(letters_sample == "a"),
+    sum(letters_sample == "e"),
+    sum(letters_sample == "l"))
+
+```
+
+```{r}
+
 #   b. Replace each occurrence of 'z' with 'x'
+letters_sample[letters_sample == "z"] <- "x"
+
+```
+
+```{r}
+
 #   c. Add each letter in your name to the end of your character vector
-#   d. Use `sort()` on your object, then print the 50th - 60th elements. 
+letters_sample <- c(letters_sample, "m", "i", "c", "h", "a", "e", "l")
+
+```
+
+```{r}
+
+#   d. Use `sort()` on your object, then print the 50th through 60th elements. 
+letters_sample_sorted <- sort(letters_sample)
+letters_sample_sorted[50:60]
 
 ```
 
 Here, we're working with random letters of the alphabet. However, these types of procedures can also be used to filter and access, for example, specific genome loci stored in a *variant call file (VCF)*.
 
-### 2.2 Data frames & R packages
+#### 2.2 Data frames (and R packages)
 
 Perhaps the most common way to collect, store, and share data is in the format of a two-dimensional "table" organized in rows (observations) and columns (variables/features). If you're familiar with an `Excel Spreadsheet`, then you're familiar with R's ***data frame objects***. For example, let's look at a ***data frame*** stored in the `datasets` ***package.***
 
-```{r, message = FALSE}
+```{r}
 
 datasets::iris
 
 ```
 
-#### 2.2.1 Loading packages
+##### 2.2.1 Packages
 
 In this section, we'll focus on how to generate, access, and manipulate ***data frames*** - the most common format to store data in `R`. We'll also introduce and use ***packages*** (such as `datasets`) which are a collection of useful tools, instructions, and data that are purpose-built to assist users in specific analyses (e.g., phylogeny or generalized linear models). In this lesson, we'll be using the `datasets` ***package*** to access some ***data frames*** to practice what we've learned. In later lessons, we'll use a powerful suite of packages called `tidyverse` which helps organize and visualize data (e.g., plotting) of many different formats.
 
@@ -275,25 +434,34 @@ In the example above, we called the `iris` ***data frame*** from the `datasets` 
 
 As you may imagine, needing to call the ***package*** every time we use it would quickly bloat our code. Fortunately, a ***package*** can be loaded into your coding environment using the `library()` ***function***, allowing you to succinctly call ***objects*** without specifying their source (just as you had with `sum()` or `sample()`). Here are a few notes on how to load ***packages***, unload ***packages***, and receive help:
 
-```{r, message = FALSE}
+```{r}
 
 library() # list all available packages for loading
+
+```
+
+```{r}
+
 library("datasets") # load the `datasets` package into the environment
+
+```
+
+```{r, message = FALSE}
 
 library(help = "datasets") # load the documentation for the package
 detach("package:datasets") # unload the package
 
 ```
 
-#### 2.2.2 Working with data frames
+##### 2.2.2 Data frames
 
 Now that we know about ***packages***, let's return to working with ***data frames***. First, let's focus on how we interact with ***data frames***. Some of the syntax below will be familiar to how we interacted with ***vectors***.
 
-```{r, message = FALSE}
+```{r}
 
 # Load library and iris data frame
 library("datasets") # Load the `datasets` package
-df<-iris # Create a copy of the `iris` dataframe
+df <- iris # Create a copy of the `iris` dataframe
 
 # Print the first six lines of the dataframe
 head(df)
@@ -310,67 +478,145 @@ Because a ***data frame*** is two-dimensional, R interprets the values inside th
 
 It follows then, to access a subset of a ***data frame*** you can use the following syntax: `df[<rows>,<columns>]`, such as `df[1:3,2:4]` to access rows `1:3` and columns `2:4`. You can also use ***vectors*** to reorganize your ***data frames*** (e.g., `df[1:10,c(5,3)]`). As with most ***objects*** in R, changes to an ***object*** are not saved unless you write those changes to an ***object.***
 
-Another important element of ***data frames*** is that the columns are often associated with a character string (i.e., a *column* *name*). In the following examples, we'll see how we can access and filter a ***data frame***:
+Another important element of ***data frames*** is that the columns are often associated with a character string (i.e., a *column* *name*). Note that we don't have to reload the `datasets` library as it's still active in our current R environment. 
 
-```{r, message = FALSE}
+In the following examples, we'll see how we can access and filter a ***data frame***:
 
-# Note that we don't have to reload the `datasets` library as it's still active in our current `R` environment. 
+```{r}
 
 # Create a copy of the `iris` data frame 
 df <- iris 
 
-# 1. View data
-df # Print `df`
+```
 
-head(df) # Print first part of `df`
-tail(df) # Print last part of `df`
+###### Viewing data
+
+```{r}
+
+df # Call the data frame to print it
+
+```
+
+```{r}
+
+head(df) # Print first 6 lines of `df`
+
+```
+
+```{r}
+
+tail(df) # Print last 6 lines of `df`
+
+```
+
+```{r}
 
 colnames(df) # Print column names of `df`
+
+```
+
+```{r}
+
 rownames(df) # Print row names of `df`
 
+```
+
+```{r}
+
 nrow(df) # Print number of rows in `df`
+
+```
+
+```{r}
+
 ncol(df) # Print number of columns in `df`
 
 ```
 
-```{r, message = FALSE}
+###### Acessings data frames
 
-# 2. Access data
+```{r}
+
 df[,1] # Extract the first column
+
+```
+
+```{r}
+
 df$Sepal.Length # Extract the column named "Sepal.Length"
+
+```
+
+```{r}
+
 setequal(df[,1], df$Sepal.Length) #Test whether two vectors are equal
 
+```
+
+```{r}
+
 df[,c("Species","Sepal.Length")] # Extract multiple columns by name
+
+```
+
+```{r}
+
 df[df$Species == "virginica",] # Extract rows by testing the value of a column
 
-# 3. Edit data
+```
+
+###### Editing data frames
+
+```{r}
+
 df <- iris # Reset the `df` object to `iris`
+head(df) # Preview df again (for reference)
+
+```
+
+```{r}
+
 df[nrow(df)+1,] <- c(100,100,100,100,NA) # Append a row (observation)
 df$collection_month <- rep("June",times=nrow(df)) # Append a column (variable)
 df
 
 ```
 
-With these methods in hand, what does the following code do?
+###### Code interpretation exercise
+
+Now that we've introduced ***data frames***, let's try and interpret the following code -- what is it doing? What is the output? Work through this line by line.
 
 ```{r, message = FALSE}
 
 # Create a new copy of the `iris` data set
 df <- iris
 
+# Create a new column called "big" and set all values to FALSE
 df$big <- FALSE
+
+# For all rows where species is "setosa" and petal length is greater than 1.6, set "big" to TRUE
 df[df$Species == "setosa" & df$Petal.Length > 1.6,]$big <- TRUE
+
+# For all rows where species is "virginica" and petal length is greater than 6.0, set "big" to TRUE
 df[df$Species == "virginica" & df$Petal.Length > 6.0,]$big <- TRUE
+
+# For all rows where species is "versicolor" and petal length is greater than 4.5, set "big" to TRUE
 df[df$Species == "versicolor" & df$Petal.Length > 4.5,]$big <- TRUE
-summary(df[df$big == TRUE,]$Species)
+
+# Print the number of rows where "big" is TRUE
+nrow(df[df$big == TRUE,])
 
 ```
 
 As you can see, increasing the dimensions of our data from one (***vector***) to two (***data frame***) increased the complexity of working with such data. The `iris` data set as an example of a very common format used to record data - particularly if your work involves fieldwork (no pun intended). In fact, having the foresight to record data in a format similar to how you store data can save a lot of time in the future!
 
-Before we move onto the final example exercise, let's walk through how to create a ***data frame*** from scratch using simulated data. Below, we'll use a few common ***functions*** to simulate (or randomly sample) data. We'll also use some formatting tricks that will help with making code a bit easier to read. If you're not sure what a ***function*** is doing below, try running each ***function*** by itself in the console below (and looking at that ***function's*** `help()`).
+###### Creating data frames from vectors
 
-```{r, message = FALSE}
+Before we move onto the final example exercise, let's walk through how to create a ***data frame*** from scratch using simulated data. 
+
+Below, we'll use a few common ***functions*** to simulate (or randomly sample) data. We'll also use some formatting tricks that will help with making code a bit easier to read. If you're not sure what a ***function*** is doing below, try running each ***function*** by itself in the console below (and looking at that ***function's*** `help()`).
+
+```{r}
 
 df<-data.frame(trial = rep(x = 1:50, # `rep()` replicates values of a vector
                            each = 2),
@@ -384,17 +630,28 @@ df<-data.frame(trial = rep(x = 1:50, # `rep()` replicates values of a vector
                               replace = T))
 
 colnames(df)
-nrow(df)
-summary(df)
+
 ```
 
-While empirical data analysis (i.e., analyzing observational data) may be the more immediately relevant use-case for R, simulation of data (e.g., output from `rnorm()`) is *extremely* important for hypotheses testing and generating null expectations. We return to this concept in a later lesson.
+```{r}
 
-#### 2.2.3 Practice with data frames
+nrow(df)
+
+```
+
+```{r}
+
+summary(df)
+
+```
+
+While empirical data analysis (i.e., analyzing observational data) may be the more immediately relevant use-case for R, simulation of data (e.g., output from `rnorm()`) is *extremely* important for hypotheses testing and generating null expectations. We return to this concept for an in-depth look in lesson 3 of this workshop.
+
+##### 2.2.3 Practice with data frames
 
 Let's close out by working through a ***data frame*** exercise that uses everything we've learned.
 
-```{r, message = FALSE}
+```{r}
 
 # Load the `airquality` dataset into a data frame object
 df <- airquality
@@ -402,15 +659,39 @@ df <- airquality
 # Count the rows missing (NA) an Ozone measurement
 # Hint: Remember the function is.na() 
 
+nrow(df[is.na(df$Ozone),])
+
+```
+
+```{r}
 
 # Remove all observations from the months of May and June (you may need to do this in multiple steps)
 # Hint: You can use `!` to negate a comparison 
 
+df <- df[!df$Month == 5,]
+df <- df[!df$Month == 6,]
+
+```
+
+```{r}
+
 # How many days was Wind greater than 10?
 
+nrow(df[df$Wind > 10,])
+
+```
+
+```{r}
+
 # Create a column called "observer" that contains your name
+df$observer <- "michael"
+
+```
+
+```{r}
 
 # Look at the 20th line of your data frame 
+df[20,]
 
 ```
 
