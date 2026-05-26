@@ -1,5 +1,5 @@
 ---
-title: "JHU Biology REU 2026: Introduction to R"
+title: "JHU Biology REU 2026: Tidyverse"
 author: "Michael Tassia"
 date: "`r Sys.Date()`"
 output:
