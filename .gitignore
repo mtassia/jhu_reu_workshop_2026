@@ -4,4 +4,4 @@
 .RData
 .Ruserdata
 *.Rproj
-knits/*Rmd
+solved/*log
