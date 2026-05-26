@@ -7,6 +7,12 @@ output:
   html_document: default
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "",
+                      fig.align = 'center',
+                      out.width = "75%")
+```
+
 R is a common object-oriented programming language for performing data analysis in biology. While other programming languagues are also common in biology (e.g., python), R (and by extension, RStudio/Posit) is a common & flexible environment to simulate, analyze, and visualize biological data.
 
 *Why program?* Programming presents a powerful way to interact and procedurally analyze/generate data in a reproducible manner (both in biology and other data-driven fields). In many subfields of biology (e.g., genetics and evolutionary biology), computer science has becoming inseparably intertwined with research. Becoming familiar/comfortable with one or two programming languages will provide far more flexibility when methods need to be catered to *your* data!
@@ -762,7 +768,7 @@ nrow(df[is.na(df$Ozone),])
 
 ```
 
-**2.    Remove all observations from the months of May and June (you may need to do this in multiple steps). *Hint: You can use `!` to negate a comparison.***
+**2. Remove all observations from the months of May and June (you may need to do this in multiple steps). *Hint: You can use `!` to negate a comparison.***
 
 ```{r}
 
@@ -771,7 +777,7 @@ df <- df[!df$Month == 6,]
 
 ```
 
-**3.    How many days was Wind greater than 10?**
+**3. How many days was Wind greater than 10?**
 
 ```{r}
 
@@ -779,7 +785,7 @@ nrow(df[df$Wind > 10,])
 
 ```
 
-**4.    Create a column called "observer" that contains your name.**
+**4. Create a column called "observer" that contains your name.**
 
 ```{r}
 
@@ -787,7 +793,7 @@ df$observer <- "michael"
 
 ```
 
-**5.    Print the 20th line of your data frame.**
+**5. Print the 20th line of your data frame.**
 
 ```{r}
 
