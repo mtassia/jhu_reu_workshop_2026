@@ -15,8 +15,8 @@ The goal of this 4-day workshop is to introduce the fundamentals of using R to a
 
 R and its libraries are frequently being updated, and new tools are being published every day to assist in data analysis. In this course, we'll only scratch the surface of computational biology. If you'd like further instruction, I recommend these resources as a starting point:
 
--   [Hands-On Programming with R](https://rstudio-education.github.io/hopr/)
--   [R for Data Science (2e)](https://r4ds.hadley.nz/)
+- [Hands-On Programming with R](https://rstudio-education.github.io/hopr/)
+- [R for Data Science (2e)](https://r4ds.hadley.nz/)
 
 Here, we'll begin by becoming familiar with the ***syntax*** of `R` (*how we interact with the programming environment*), common `R` ***objects*** (*what we interact with*), and how we manipulate objects in `R` using ***functions*** (*performing actions on objects*).
 
@@ -30,10 +30,10 @@ You can run the code blocks by clicking the green "Run" button that appears when
 
 Some important keyboard shortcuts:
 
--   `CTRL+ENTER` (Windows) or `CMD+RETURN` (Mac): *Run current line*
--   `CTRL+SHIFT+ENTER` (Windows) or `CMD+SHIFT+RETURN` (Mac): *Run current block*
+- `CTRL+ENTER` (Windows) or `CMD+RETURN` (Mac): *Run current line*
+- `CTRL+SHIFT+ENTER` (Windows) or `CMD+SHIFT+RETURN` (Mac): *Run current block*
 
-Within the code blocks, you'll frequently see the `#` character. `#` tells R (as well as most other common programming languages) to ignore the rest of the line. This is a common way to add *comments* to your code -- describing what the code is doing, what the output means, or as guidance for your own workflow. For example, lets use the following intuitive code block to demonstrate how comments work:
+Within the code blocks, you'll frequently see the `#` character. `#` tells R (as well as most other common programming languages) to ignore the rest of the line. This is a common way to add ***comments*** to your code -- describing what the code is doing, what the output means, or as guidance for your own workflow. For example, lets use the following intuitive code block to demonstrate how comments work:
 
 ```{r}
 
@@ -180,10 +180,10 @@ When you call an object by itself, the value of that object is often returned by
 
 Importantly, it's recommended that you name objects intuitively, as they'll be important if you need to debug or recall specific values from your data. A few tips about naming objects:
 
--   Use `_` in place of spaces (e.g., `example_integer`)
--   Object names cannot begin with integers or operators (e.g., `1example_integer` and `!example_integer` do not work)
--   Capitol and lowercase letters are different (e.g., `example_integer` and `Example_integer` are two different objects)
--   Be consistent with your typesetting (e.g., `example_integer` & `results_output`, `EXAMPLE_INTEGER` & `RESULTS_OUTPUT`, `ExampleInteger` & `ResultsOutput`)
+- Use `_` in place of spaces (e.g., `example_integer`)
+- Object names cannot begin with integers or operators (e.g., `1example_integer` and `!example_integer` do not work)
+- Capitol and lowercase letters are different (e.g., `example_integer` and `Example_integer` are two different objects)
+- Be consistent with your typesetting (e.g., `example_integer` & `results_output`, `EXAMPLE_INTEGER` & `RESULTS_OUTPUT`, `ExampleInteger` & `ResultsOutput`)
 
 #### 1.1.2 Practice with operators.
 
@@ -204,7 +204,7 @@ Now that we know the basics, let's practice using operators and objects with the
 
 ```
 
-**3. For each value in the series, divide by the product of 10 and 5**
+**3. For each value in the series, divide each element by** $(10*5)$
 
 ```{r}
 
@@ -439,9 +439,9 @@ head(letters)
 
 **1. Use `sample()` to create a vector object with the following traits:**
 
--   *Contains 100 random samples from the pre-existing `letters` object*
--   *Sample letters with replacement*
--   *NOTE: Store your object in a variable called something other than `letters`*
+- *Contains 100 random samples from the pre-existing `letters` object*
+- *Sample letters with replacement*
+- *NOTE: Store your object in a variable called something other than `letters`*
 
 ```{r}
 
@@ -451,7 +451,7 @@ head(letters)
 
 **2. Using your vector object, perform the following tasks (in order):**
 
--   *Count each letter that appears in your first name:*
+- *Count each letter that appears in your first name:*
 
 ```{r}
 
@@ -459,7 +459,7 @@ head(letters)
 
 ```
 
--   *Replace each occurence of 'z' with 'x':*
+- *Replace each occurence of 'z' with 'x':*
 
 ```{r}
 
@@ -467,7 +467,7 @@ head(letters)
 
 ```
 
--   *Add each letter in your name to the end of your character vector:*
+- *Add each letter in your name to the end of your character vector:*
 
 ```{r}
 
@@ -475,7 +475,7 @@ head(letters)
 
 ```
 
--   *Use `sort()` on your object, then print the 50th through 60th elements.*
+- *Use `sort()` on your object, then print the 50th through 60th elements.*
 
 ```{r}
 
@@ -532,9 +532,9 @@ In our examples of accessing data in ***vectors***, we used the `[]` operator to
 
 Because a ***data frame*** is two-dimensional, R interprets the values inside the brackets differently. Here's how integers in brackets work for accessing values in a ***data frames:***
 
--   ***Integers*** without a comma will return whole columns: `df[1:3]`
--   ***Integers*** followed by a comma will return rows: `df[1:3,]`
--   ***Integers*** preceded by a column will extract columns as a vector: `df[,1:3]`
+- ***Integers*** without a comma will return whole columns: `df[1:3]`
+- ***Integers*** followed by a comma will return rows: `df[1:3,]`
+- ***Integers*** preceded by a column will extract columns as a vector: `df[,1:3]`
 
 It follows then, to access a subset of a ***data frame*** you can use the following syntax: `df[<rows>,<columns>]`, such as `df[1:3,2:4]` to access rows `1:3` and columns `2:4`. You can also use ***vectors*** to reorganize your ***data frames*** (e.g., `df[1:10,c(5,3)]`). As with most ***objects*** in R, changes to an ***object*** are not saved unless you write those changes to an ***object.***
 
@@ -796,5 +796,5 @@ Above, we covered several examples of the ***operators*** and ***functions*** us
 
 ## 3. Recommended reading
 
--   [Chapters 2 in ***Hands on Programming with R***](https://rstudio-education.github.io/hopr/basics.html)
--   [*Chapter 2 in **R for Data Science***](https://r4ds.hadley.nz/workflow-basics)
+- [Chapters 2 in ***Hands on Programming with R***](https://rstudio-education.github.io/hopr/basics.html)
+- [*Chapter 2 in **R for Data Science***](https://r4ds.hadley.nz/workflow-basics)
