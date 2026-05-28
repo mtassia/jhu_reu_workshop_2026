@@ -7,7 +7,7 @@ output:
   html_document: default
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(comment = "",
                       fig.align = 'center',
                       out.width = "75%")
@@ -263,7 +263,7 @@ df <- starwars
 
 With these data, modify the `df` object in the following tasks:
 
-1.  **Subset to: name, height, mass, homeworld, species**
+1.  Subset to: *name, height, mass, homeworld,* and *species*
 
 ```{r}
 
@@ -272,7 +272,7 @@ df <- df %>%
 
 ```
 
-2.  **Remove any rows where either `height` or `mass` is NA (remember the `is.na()` test)**
+2.  Remove any rows where either *height* or *mass* is `NA` (remember the `is.na()` function)
 
 ```{r}
 
@@ -282,7 +282,7 @@ df <- df %>%
 
 ```
 
-3.  **Compute and create a column that contains the mass per unit height**
+3.  Compute and create a column that contains the mass per unit height
 
 ```{r}
 
@@ -291,7 +291,7 @@ df <- df %>%
 
 ```
 
-4.  **Arrange your data such by the values in your new column (descending)**
+4.  Arrange your data such by the values in your new column (descending)
 
 ```{r}
 
@@ -302,7 +302,7 @@ df <- df %>%
 
 With these reformatted data, address the following questions:
 
-5.  **Which character has the lowest mass per unit height?**
+5.  Which character has the lowest mass per unit height?
 
 ```{r}
 
@@ -310,7 +310,7 @@ df[nrow(df), "name"]
 
 ```
 
-6.  **Using `summarise()`, which homeworld has the greatest mean `mass`?**
+6.  Using `summarise()`, which *homeworld* has the greatest mean *mass*?
 
 ```{r}
 
@@ -322,7 +322,7 @@ df %>%
 
 ```
 
-7.  **Using `summarise()`, which species has the greatest mean `mass`?**
+7.  Using `summarise()`, which species has the greatest mean *mass*?
 
 ```{r}
 
@@ -371,10 +371,10 @@ Now that we're set up, let's try and recreate the following plot that was genera
 
 First, we need to know precisely *what* is being plotted with `ggplot()`. Though there are many cosmetic elements to the plot above, we can summarise the aeshetics as the following:
 
-1.  `x-axis` is "Petal.Width"
-2.  `y-axis` is "Petal.Length"
-3.  `color` is "Species"
-4.  Data are presented as a "scatter plot"
+1.  **x-axis** is *Petal.Width*
+2.  **y-axis** is *Petal.Length*
+3.  **color** is *Species*
+4.  Data are presented as a scatter plot
 
 We'll build this plot from the ground up. To start, we need to create a `ggplot` object that will organize the data for plotting and allow us to add layers to the plot (e.g., points, lines, boxes, etc.).
 
@@ -475,7 +475,7 @@ df <- iris
 
 ```
 
-**1. For both "Sepals" and "Petals", add columns (using `mutate()`) that compute the "sepal" and "petal" area (**$\text{length} \times \text{width}$).
+**1.** For both sepals and petals variables, respectively, add columns (using `mutate()`) that compute the sepal and "petal areas ($\text{length} \times \text{width}$).
 
 ```{r}
 
@@ -485,7 +485,15 @@ df <- df %>%
 
 ```
 
-**2. Create a plot with the following features:** - **x-axis is "Petal Area"** - **y-axis is "Sepal Area"** - **First geom layer is a trend line (use `method = "lm"` as an argument)** - **Second geom layer is a scatter plot**
+**2.** Create a plot with the following features:
+
+-   **x-axis** is *petal area*
+
+-   **y-axis** is *sepal area*
+
+-   [First]{.underline} geometric layer is a trend line (`geom_smooth`: use `method = "lm"` and `formula = y ~ x` arguments)
+
+-   [Second]{.underline} geom layer is a scatter plot (`geom_point`)
 
 ```{r}
 
@@ -498,7 +506,7 @@ df %>%
 
 ```
 
-**3. How would you describe the trend in your data? Does this trend change when you color by `Species`?**
+**3.** How would you describe the trend in your data? Does this trend change when you color by *Species*?
 
 ```{r}
 
@@ -514,7 +522,7 @@ df %>%
 
 As with all coding, your comfort with plotting in R will improve as you spend time with it. Just as you processed the data above to identify trends in flower anatomy, these same principles are widely applicable to a variety of sciences.
 
-In the example above, we plotted the relationship between ***continuous variables*** (e.g., "Petal Width" and "Petal Length") using a curve (`geom_smooth()`) overlaid onto a scatter plot (`geom_point`). In the next section, we'll discuss and practice additional plot types that are better used for other formats of data.
+In the example above, we plotted the relationship between ***continuous variables*** (e.g., *petal width* and *petal length*) using a curve (`geom_smooth`) overlaid onto a scatter plot (`geom_point`). In the next section, we'll discuss and practice additional plot types that are better used for other formats of data.
 
 ### 2.4 Additional plotting tools
 
@@ -605,6 +613,8 @@ ggplot(data = df,
 
 We've only scratched the surface of plotting with `ggplot2`; if you'd like a resource to help guide you through producing a specific plot, take a look at their [cheatsheet](https://ggplot2.tidyverse.org/). As a reminder, we don't expect you to memorize all these tools and commands, but rather provide guidance on how they can be used in data analysis. In fact, leveraging online resources is common throughout an entire career of data science.
 
+---
+
 ## 3. Practice
 
 We'll close out this lesson with a plotting exercise. I'll provide a ***function key*** below (as a reminder, you can use the `help()` ***function*** for more details)**:**
@@ -629,7 +639,7 @@ We'll close out this lesson with a plotting exercise. I'll provide a ***function
 
     -   Common arguments: `ncol = <int>`,`nrow = <int>`
 
--   Common themes: `theme_minimal()`,`theme_classic()`,`theme_bw()`
+-   Common themes: `theme_minimal()`, `theme_classic()`, `theme_bw()`
 
 ```{r}
 
@@ -641,7 +651,7 @@ df <- mpg
 
 Using these data, do the following:
 
-1.  **Familiarize yourself with the data (which variables are continuous/categorical?)**
+1.  Familiarize yourself with the data. Which variables are ***continuous***/***categorical***?
 
 ```{r}
 
@@ -649,7 +659,7 @@ head(df)
 
 ```
 
-2.  **Plot a histogram of `cyl` (what is the most common number of cylinders?)**
+2.  Plot a histogram of *cylinder count* (what is the most common number of cylinders?)
 
 ```{r}
 
@@ -660,7 +670,7 @@ ggplot(data = df,
 
 ```
 
-3.  **Using mutate, compute the mean 'miles per gallon' using the `cty` and `hwy` variables and store your mutated data frame to an object for the subsequent tasks.**
+3.  Using `mutate`, compute the mean 'miles per gallon' (*mpg*) using the *cty* and *hwy* variables. Store your mutated ***data frame*** to a new ***object*** for the subsequent tasks.
 
 ```{r}
 
@@ -669,7 +679,7 @@ df <- df %>%
 
 ```
 
-4.  **Create a box plot capturing your mean "mpg" for each manufacturer (which manufacturer has the highest mean mpg?)**
+4.  Create a box plot capturing your mean *mpg* for each *manufacturer*. Which *manufacturer* has the highest mean *mpg*?
 
 ```{r}
 
@@ -683,7 +693,7 @@ ggplot(data = df,
 
 ```
 
-5.  **Facetting by `class`, plot `displ` against your `mpg` and add a trend line (do any trends stand out?)**
+5.  Faceting by *class*, plot *engine displacement* against your *mpg* measurements and add a trend line. Do any trends stand out?
 
 ```{r}
 

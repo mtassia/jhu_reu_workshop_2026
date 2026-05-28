@@ -7,7 +7,7 @@ output:
   html_document: default
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(comment = "",
                       fig.align = 'center',
                       out.width = "75%")
@@ -195,7 +195,7 @@ Importantly, it's recommended that you name objects intuitively, as they'll be i
 
 Now that we know the basics, let's practice using operators and objects with the following exercise. Below is a code block with tasks enumerated in comments. Try to fill in the blanks to complete the tasks (you can use the code above as a reference).
 
-**1. Create an object that stores all integers from 1 to 100**
+**1.** Create an ***object*** that stores all integers from 1 to 100 (inclusive)
 
 ```{r}
 
@@ -203,7 +203,7 @@ int_vec <- 1:100
 
 ```
 
-**2. For each value in the series, multiply each element by** $(10 + 2^4)$
+**2.** For each value in the ***vector***, [multiply]{.underline} each element by $10 + 2^4$
 
 ```{r}
 
@@ -211,7 +211,7 @@ int_vec <- int_vec * (10 + 2^4)
 
 ```
 
-**3. For each value in the series, divide by the product of 10 and 5**
+**3.** For each value in the ***vector***, [divide]{.underline} by $10 \times 5$
 
 ```{r}
 
@@ -219,7 +219,7 @@ int_vec <- int_vec / (10 * 5)
 
 ```
 
-**4. How many values are greater than or equal to 50?**
+**4.** How many values are greater than or equal to $50$?
 
 ```{r}
 
@@ -227,7 +227,7 @@ int_vec >= 50
 
 ```
 
-**5. How many values in the object are less that 25?**
+**5.** How many values in the object are less that $25$?
 
 ```{r}
 
@@ -292,6 +292,8 @@ Applying ***functions*** to data stored in objects is at the core of how biologi
 3.  ***Functions*** (e.g., `sum()`)
 
 Next, we'll highlight some common types of objects and how to manipulate them.
+
+---
 
 ## 2. Common R objects - vectors and data frames
 
@@ -444,11 +446,11 @@ head(letters)
 
 ```
 
-**1. Use `sample()` to create a vector object with the following traits:**
+**1.** Use `sample()` to create a ***vector object*** with the following:
 
--   *Contains 100 random samples from the pre-existing `letters` object*
--   *Sample letters with replacement*
--   *NOTE: Store your object in a variable called something other than `letters`*
+-   Contains 100 random samples from the pre-existing `letters` object
+-   Samples letters with replacement using `sample()`
+-   *NOTE: Store your **object** in a variable called something other than `letters`*
 
 ```{r}
 
@@ -457,9 +459,9 @@ head(letters_sample)
 
 ```
 
-**2. Using your vector object, perform the following tasks (in order):**
+**2.** Using your ***vector object***, perform the following tasks:
 
--   *Count each letter that appears in your first name:*
+-   Count each letter that appears in your first name:
 
 ```{r}
 sum(sum(letters_sample == "m"),
@@ -472,7 +474,7 @@ sum(sum(letters_sample == "m"),
 
 ```
 
--   *Replace each occurence of 'z' with 'x':*
+-   Replace each occurrence of 'z' with 'x':
 
 ```{r}
 
@@ -480,7 +482,7 @@ letters_sample[letters_sample == "z"] <- "x"
 
 ```
 
--   *Add each letter in your name to the end of your character vector:*
+-   Add each letter in your name to the end of your character ***vector***:
 
 ```{r}
 
@@ -488,7 +490,7 @@ letters_sample <- c(letters_sample, "m", "i", "c", "h", "a", "e", "l")
 
 ```
 
--   *Use `sort()` on your object, then print the 50th through 60th elements.*
+-   Use `sort()` on your ***object***, then print the 50th through 60th elements.
 
 ```{r}
 
@@ -760,7 +762,7 @@ df <- airquality
 
 ```
 
-**1. Count the rows missing (NA) an Ozone measurement. *Hint: Remember the function `is.na()`***
+**1.** Count the rows missing *Ozone* measurements. *Hint: Use the function, `is.na()`*
 
 ```{r}
 
@@ -768,7 +770,7 @@ nrow(df[is.na(df$Ozone),])
 
 ```
 
-**2. Remove all observations from the months of May and June (you may need to do this in multiple steps). *Hint: You can use `!` to negate a comparison.***
+**2.** Remove all observations from the months of *May* and *June* (you may need to do this in multiple steps). *Hint: You can use `!` to negate a comparison.*
 
 ```{r}
 
@@ -777,7 +779,7 @@ df <- df[!df$Month == 6,]
 
 ```
 
-**3. How many days was Wind greater than 10?**
+**3.** How many days was *Wind* greater than $10$?
 
 ```{r}
 
@@ -785,7 +787,7 @@ nrow(df[df$Wind > 10,])
 
 ```
 
-**4. Create a column called "observer" that contains your name.**
+**4.** Create a column called "observer" that contains your name.
 
 ```{r}
 
@@ -793,7 +795,7 @@ df$observer <- "michael"
 
 ```
 
-**5. Print the 20th line of your data frame.**
+**5.** Print the 20th line of your data frame.
 
 ```{r}
 
