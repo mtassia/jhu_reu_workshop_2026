@@ -1,5 +1,5 @@
 ---
-title: "JHU Biology REU 2026: Biological Data"
+title: "JHU Biology REU 2026: Genetic data"
 author: "Michael Tassia"
 date: "`r Sys.Date()`"
 output:
@@ -10,7 +10,8 @@ output:
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(comment = "",
                       fig.align = 'center',
-                      out.width = "75%")
+                      out.width = "75%",
+                      dev = "jpeg")
 ```
 
 In this lesson, we'll work to reproduce plots that are common in ***genetics***. Figure reproduction using diverse data sets serves as valuable practice with data literacy and familiarity with R. This lesson will also include many code blocks without any explicit code in them – offering you the opportunity to practice what we've learned throughout this workshop!
@@ -42,7 +43,7 @@ In the first section of this lesson, we'll use a subset of the 1KGP data to look
 
 To begin, let's load and describe the data set:
 
-```{r}
+```{r, warning = FALSE}
 
 library(tidyverse)
 
@@ -71,9 +72,9 @@ When working with ***genetic sequencing*** data, we often describe genetic varia
 
 Each sample is compared to the *reference* to identify ***genetic variants.*** Above, each of the three diploid samples possesses at least $1$ ***genetic variant*** (relative to the reference). To compute the ***allele frequency*** for each locus, we sum the count of ***variant genotypes*** and divide by the total number of genotypes sampled (represented as bar plots at the top of the figure).
 
-In 1KGP, ***allele frequency*** is computed at the global scale(`AF` column) and within each continental groups (e.g., `AFR_AF` column). *Continental group* is a label assigned to a sample based on where it was collected and [does not]{.underline} directly represent genetic ancestry.
+In 1KGP, ***allele frequency*** is computed at the global scale (`AF` column) and within each continental groups (e.g., `AFR_AF` column). *Continental group* is a label assigned to a sample based on where it was collected and [does not]{.underline} directly represent genetic ancestry.
 
-#### 1.1.2 Plotting AFS.
+#### 1.1.2 Plotting allele frequency spectra.
 
 We will first visualize ***genetic variation*** by plotting an ***allele frequency spectrum** –* a ***histogram*** of ***allele frequencies***.
 
@@ -88,7 +89,7 @@ ggplot(data = df,
 
 ```
 
-In the ***allele frequency spectrum*** plotted above, we see most ***genetic variants*** are observed at very low frequency $\lt 0.02$ when examined at a global scale. What about the trends *within* each continental group?
+In the ***allele frequency spectrum*** plotted above, we see most ***genetic variants*** are observed at very low frequency $< 0.02$ when examined at a global scale. What about the trends *within* each continental group?
 
 2.  Plot an ***allele frequency spectrum*** for each of the five continental groups.
 
@@ -120,7 +121,7 @@ ggplot(data = df,
 
 ```
 
-Even when separating out by *continental group* labels, each ***allele frequency spectrum*** looks qualitatively similar - most ***genetic variants*** are at very low frequency across human populations!
+Even when separating out by *continental group* labels, each ***allele frequency spectrum*** looks ***qualitatively*** similar - most ***genetic variants*** are at very low frequency across human populations!
 
 Biologically, this pattern is consistent with recent population expansions. Check out [Schraiber et al. 2015](https://www.nature.com/articles/nrg4005) to learn more about how geneticists use ***allele frequency spectra*** to gain insight into the evolutionary pressures that shape modern populations.
 
@@ -130,119 +131,195 @@ Next, we'll use ***genetic variants*** to look more closely at genetic structure
 
 #### 1.2.1 What is PCA?
 
-As a reminder, we compute *allele frequency* by first *genotyping* each sample - measuring the alleles in each individual's genome relative to a reference genome (i.e., `GRCh38` in our data set). In addition to using AFS to gain insight into the whole population, we can also compare genotypes to measure relationships between samples. Though there are many ways to investigate relationships between samples (e.g., phylogenetics), we'll apply ***principle component analysis*** (PCA).
+In addition to aggregating information across all ***genetic variants*** observed across 1KGP, we can also use patterns of [shared]{.underline} ***genetic variants*** to estimate relationships [between]{.underline} samples! There are multiple ways to investigate relationships between samples (e.g., phylogenetics); here, we'll use ***principle component analysis*** (***PCA***).
 
-PCA can be used to simplify complex data sets by finding "new axes" that capture the most important patterns of variation in the data. The mathematical details of PCA are well-outside the scope of this workshop, but check out [this link to an interactive example of what PCA is and how it works](https://setosa.io/ev/principal-component-analysis/).
+***PCA*** can be used to simplify complex data sets by finding *new axes* that capture the most variation observed in the data. The mathematical procedures underlying PCA are beyond the scope of this workshop, but check out [this link to an interactive example of what PCA is and how it works](https://setosa.io/ev/principal-component-analysis/).
 
 #### 1.2.2 Preparing genetic data for PCA.
 
-In the example below, we'll use PCA to explore the genetic relationships between 1KGP samples (using common variants on chromosome 21). For this example, we'll use genotype data from a random subset (500 loci) of chromosome 21. This subset will include only *common variants* ($AF ≥ 5\%$), as rare variants have very little "shared information" to help us dissect relationships between samples.
+In the example below, we'll use ***PCA*** to explore the genetic relationships between 1KGP samples (using common variants on chromosome 21). We'll use genotype data from a random subset of common variants ($AF \ge 5\%$) on chromosome 21 ($n = 500 \text{ loci}$).
 
-The code below will also revisit many functions and data transformation procedures that we've covered throughout this workshop. This will be the most complex example we've encountered so far, so work slowly and carefully to understand each step.
+The code below will also revisit many ***functions*** and techniques that we've introduced throughout the entire workshop. Remember, you can always look at a ***function's*** documentation if you need help (`?<function>`)!
 
-```{r, results=FALSE, message=FALSE, warning=FALSE}
+```{r, message = FALSE}
 
-# Load data
-
-df <- read_csv(file = "data/1KGP_chr21_genotypes.csv.gz",
+# Load genotype data
+df.gt <- read_csv(file = "../data/1KGP_chr21_genotypes.csv.gz",
                show_col_types = FALSE)
-df.meta <- read_tsv(file = "data/1KGP_metadata.tsv",
+
+# Preview genotype data
+df.gt[1:5,1:8]
+
+```
+
+```{r, message = FALSE}
+
+# Load sample metadata
+df.meta <- read_tsv(file = "../data/1KGP_metadata.tsv",
                     show_col_types = FALSE)
 
 # Preview data
-head(df)
 head(df.meta)
 
 ```
 
 Using the data we've loaded above, we want to do the following:
 
-1.  [Prepare]{.underline} `df` for PCA (we'll be using the `prcomp()` ***function*** to perform PCA). `prcomp()` expects a `data frame` or `matrix` ***object*** where rows are samples (e.g., *HG00096*) and columns are variables (e.g. *chr21_7924894*).
-2.  [Perform PCA]{.underline} to quantify patterns of variation among our sample genotypes
-3.  [Plot]{.underline} these results to visualize PCA results
+1.  [Prepare]{.underline} `df.gt` for PCA
+2.  [Apply ***PCA***]{.underline} to ***quantify*** patterns of variation observed across all ***genetic variants***
+3.  [Plot]{.underline} our findings to visualize trends in the data
 
-If we look at the `prcomp` documentation, we can see that the `prcomp` method expects input (`x`) to be, "*a numeric or complex matrix (or data frame)*", where rows are observations and columns are variables. We'll prepare that data below:
+If we look at the `prcomp` documentation, we can see that the `prcomp` method expects input (`x`) to be, "*a numeric or complex matrix (or data frame)*", where rows are observations (i.e., samples such as *HG00096*) and columns are variables (i.e., loci such as *chr21_7924894)*.
+
+We'll prepare the `df.gt` ***data frame*** together:
+
+1.  Remove columns we don't need (columns `2:7`) using `select()`.
 
 ```{r}
 
-# Remove columns we don't need (columns 2:7) using `select()`
+df.gt <- df.gt %>% 
+  select(!2:7)
 
-# Use `as.data.frame()` to convert the tibble to a dataframe
-
-# Set row names to sample IDs using `column_to_rownames()`
-
-# We use the `t()` function to transpose our data frame
+df.gt[1:5,1:5]
 
 ```
+
+2.  Use `as.data.frame()` to convert the `tibble` into a ***data frame.*** **`Tibble`** objects do not have row names – a requirement for our use of `prcomp`.
+
+```{r}
+
+df.gt <- as.data.frame(df.gt)
+
+```
+
+3.  Set row names to the sample IDs using `column_to_rownames()`.
+
+```{r}
+
+df.gt <- column_to_rownames(df.gt, var = "POS")
+
+```
+
+4.  Use `t()` to transpose our ***data frame***.
+
+```{r}
+
+df.gt <- t(df.gt)
+
+# Preview data
+df.gt[1:5,1:5]
+
+```
+
+Our ***data frame*** is now properly formatted for ***PCA***!
+
+The rows of formatted `df.gt` object are participants of 1KGP, and the columns are genetic loci. Each element in our ***data frame*** is an individual's genotype. Genotype is encoded as either $0$, $1$, or $2$, capturing the count of alternative alleles an individual carries at a given locus.
 
 #### 1.2.3 Running PCA.
 
-With our properly formatted data in-hand, we can now perform PCA and prepare the output for plotting.
+With `df.gt` properly formatted, we'll perform ***PCA*** and describe the results below.
+
+1.  Use `prcomp()` to run ***PCA*** on `df.gt`. We'll set `center = TRUE` in the `prcomp()` command below. You can read more about this argument in the `prcomp` documentation and in [Chapter 12 of Introduction to Statistical Learning](https://www.statlearning.com/).
 
 ```{r}
 
-# Run PCA on our data using `prcomp()`
+# Apply PCA
+pca.gt <- prcomp(df.gt, 
+                 center = TRUE)
 
-# Preview our PCA output using `glimpse()`
+# Preview output
+glimpse(pca.gt)
 
 ```
 
-We can see from the preview above that there are is quite a lot of information in the PCA output object. For now, we'll focus on the information stored in the `x` slot of the PCA output. This slot contains the "new variables" (i.e., the ***principle components***, or ***PCs***) and each sample's values (loadings) on those new variables.
+From the `glimpse()` output above, we see there is quite a lot of information output from `prcomp()`. For now, we'll focus on the information stored in the `x` slot of the PCA output. This slot contains the ***principle components*** (or ***PCs***) and each sample's ***loadings*** on those new variables. Imagine each ***principle component*** as a new variable and ***loadings*** as a measurements of that variable.
 
-PCs are ordered by the amount of variation they capture in the data, so $PC1$ captures the most variation, $PC2$ the next greatest, and so on. In practice, we often find that the first few PCs capture most of the variation in the data, so we'll focus on those for plotting.
+***PCs*** are arranged in descending order by the amount of variation they capture in the data. Thus, $\text{PC}1$ captures the most variation, $\text{PC}2$ the next greatest, and so on. In practice, we often plot the the first few ***PCs***, as these are the most informative, easiest to visualize (e.g., in 2D or 3D space), and often easiest to interpret.
 
-#### 1.2.4 Prepare PCA results for plotting.
-
-We'll begin by extracting only the first two PCs from our PCA output and putting them in a data frame for plotting.
+Similar to how we used `summary()` on ***linear regression*** output in the previous lesson, we can use `summary()` on our ***PCA*** output to quickly extract the proportion of variance explained by each ***PC***:
 
 ```{r}
-# Begin by extracting the PCs and their loadings from the `x` slot of the `prcomp()` output
 
-pca_results <- pca$x
+pca_summary <- summary(pca.gt)
+pca_summary$importance[,1:5]
 
-# Create a new dataframe with three columns: sample, PC1, and PC2. 
-# The `sample` column will be the row names of our PCA output (i.e., the sample IDs), and the `PC1` and `PC2` columns will be the first two PCs from our PCA output.
+```
 
-pca_df<-data.frame(sample = rownames(df),
-                   PC1 = pca_results[,1], # We use the `[]` operator to subset matrices...
-                   PC2 = pca_results[,2]) # ...using the same syntax as data frames.
+In the example above, we also used the `$` in a slightly different way than when we've used it to pull columns from a ***data frame***. Broadly, `$` in R is used to access "subsets/slots" of an ***object***, where the "subset/slot" is defined by the ***object*** class (for ***data frames***, `$` extracts columns).
 
+From the summary above, we see that $\text{PC}1$ captures approximately $10\%$ of the variance in our data, $\text{PC}2$ captures approximately $3\%$, so on. The last ***PCs*** explain a vanishingly small proportion of variation. As a demonstration, let's plot the *proportion of variance* explained by each ***PC***:
+
+```{r, message = FALSE}
+
+# Create a plotting df
+var_explained <- pca_summary$importance[2,]
+df <- data.frame(PC = 1:length(var_explained),
+                 Prop_var = var_explained)
+
+# Plot 
+ggplot(data = df,
+       mapping = aes(x = PC, y = Prop_var)) +
+  geom_line() +
+  scale_y_log10() +
+  theme_minimal() +
+  labs(x = "principle component",
+       y = "proportion of var. explained")
+
+```
+
+#### 1.2.4 Plot $\text{PC}1$ vs. $\text{PC}2$
+
+As each ***PC*** represents an axis of variation in our multi-dimensional data set; here, each dimension captures ***genetic variation*** at a single locus in the genome.
+
+By plotting samples in the space defined by the first few ***PCs***, we can gain insight into structure in our data. For example, if two samples are close together in a space defined by $\text{PC}1$ and $\text{PC}2$, then we might interpret they have similar ***genetic variation*** across the genome.
+
+Below, we'll plot $\text{PC}1$ vs. $\text{PC}2$*.*
+
+1.  Begin by extracting $\text{PC}1$ and $\text{PC}2$ ***loadings*** from the `x` slot of the `prcomp()` output.
+
+```{r}
+
+# Extract loadings from PCA output
+pca_loadings <- pca.gt$x
+
+# Create df with PC1 and PC2 loadings
+pca_df <- data.frame(PC1 = pca_loadings[,1], 
+                     PC2 = pca_loadings[,2]) %>%
+  rownames_to_column(var = "sample")
+
+# Preview data
 head(pca_df)
 
 ```
 
-In the example above, we also used the `$` in a slightly different way than when we've used it to pull columns from a ***data frame***. Broadly, `$` in R is used to access "subsets/slots" of an object, where the "subset/slot" is defined by the object type (for ***data frames***, it's columns). We won't encounter more varieties of the `$` operator in this workshop, but you will likely encounter `$` for other non-***data-frame*** objects in the future if you continue to use `R`.
-
-Now that we have our focal PCA results, we can merge these data with our sample metadata for plotting. The relevance of this step will become apparent when we plot.
+2.  Merge $\text{PC}1$ and $\text{PC}2$ loadings with the sample metadata stored in `df.meta`. Use `merge()` to combine two ***data frames*** that share a variable. The relevance of this step will become apparent later.
 
 ```{r}
-# Use the `merge()` function to combine our PCA results and metadata
 
-pca_df <- merge(pca_df, df.meta) # By default, `merge` will combine data frames by a shared column name (in this case, "sample")
+pca_df <- merge(pca_df, df.meta) 
 
 # Preview the merged dataframe
 head(pca_df)
 
 ```
 
-#### 1.2.5 Plot PCA results.
-
-Using the `pca_df` object, plot the first two PCs and see if any patterns emerge:
+3.  Using the merged `pca_df` object, plot the $\text{PC}1$ and $\text{PC}2$ ***loadings*** against each other with a scatter plot.
 
 ```{r}
 
-# Using `ggplot()`, create a scatterplot with PC1 on the x-axis and PC2 on the y-axis.
+ggplot(data = pca_df,
+       mapping = aes(x = PC1,
+                     y = PC2)) +
+  geom_point() +
+  theme_minimal()
 
 ```
 
-Using this version of the PCA plot, we observe two things:
+In the plot above, we can see $\text{PC}1$ separates one cluster from two other clusters, and $\text{PC}2$ separates the "other" clusters along a continuum. To gain further insight into possible biological properties of these clusters, we can annotate our plot with additional information.
 
-1.  `PC1` separates one cluster from other clusters along a continuum of samples (points)
-2.  `PC2`\$\` separates the "other" clusters along another continuum
+We'll begin by adding a categorical variable to our plot - the self-reported *sex* of each sample. Because *sex* is encoded as either $1$ or $2$, we first need to make sure the variable is being treated as a ***categorical variable*** and not a ***continuous variable***.
 
-By themselves, PCs don't describe any biological or technical feature of the data - they're simply the "axes" that capture the most variation in the data. In order to interpret these axes, we need to annotate our plot with additional information.
-
-We'll begin by adding a categorical variable to our plot - the self-reported `sex` of each sample. Because `sex` is encoded as either $1$ or $2$, we first need to make sure the variable is being treated as a categorical variable. Once we've done that conversion, we can add `sex` to our plot using the `shape` aesthetic:
+4.  Convert *sex* variable to a factor using `mutate()` and `as.factor()`
 
 ```{r}
 
@@ -250,29 +327,49 @@ We'll begin by adding a categorical variable to our plot - the self-reported `se
 pca_df <- pca_df %>% 
   mutate(sex = as.factor(sex))
 
-# Using the same plotting backbone as the one used above, add `sex` to the plot using the `shape` aesthetic.
-
 ```
 
-In this plot, we see that `sex` is evenly distributed across all clusters when plotted with `PC1` and `PC2` - thus we can conclude that first two PCs are not capturing the variance due to `sex`.
-
-Let's add another categorical variable to our plot - the `congroup` (i.e., "continental group") of each sample. We'll scale the color of each point by `contgroup` using the `color` aesthetic:
+5.  Plot ***PCA*** results again, this time using *sex* as a `color` aesthetic.
 
 ```{r}
 
-# Plot again, this time adding `contgroup` to the plot using the `color` aesthetic. 
+ggplot(data = pca_df,
+       mapping = aes(x = PC1,
+                     y = PC2,
+                     color = sex)) +
+  geom_point() +
+  theme_minimal()
 
 ```
 
-Using the `contgroup` categorical variable, we can now see that `PC1` and `PC2` can sufficiently separate the five "continental groups", though there is still a continuum of relationships along each PC. If you'd like to know more about how human geneticists treat population labels, you can [read more about it here](https://nap.nationalacademies.org/resource/26902/interactive/).
+Both *sex* values are evenly distributed across all clusters when plotted on $\text{PC}1$ and $\text{PC}2$ - thus we can conclude that first two PCs do not capture any ***genetic variation*** due to *sex*. This shouldn't be surprising, as we are using a subset of chromosome 21.
+
+Let's add a different ***categorical variable*** to our plot: *continental group* (`contgroup` in the metadata).
+
+6.  Plot the ***PCA*** results again, this time setting using *continental group* for the `color` aesthetic:
+
+```{r}
+
+ggplot(data = pca_df,
+       mapping = aes(x = PC1,
+                     y = PC2,
+                     color = contgroup)) +
+  geom_point() +
+  theme_minimal()
+
+```
+
+*Continental group* stratifies on both ***PCs!*** The results you've plotted above have been recapitulated many times in recent studies on human genetics and human ancestry (see [Taylor et al. 2024](https://www.nature.com/articles/s41586-024-07708-2)). Note that there is a continuum of samples across both axes; and as we saw earlier, these two ***PCs*** only account for approximately $10\%$ of ***genetic variation***. [Very little genetic variation is explained by population labels!]{.underline}
+
+If you'd like to know more about how geneticists treat population labels and how they use them for studying human ancestry, you can [read more about it here](#0).
 
 ### 1.3 Summary of 1KGP analyses
 
 To summarize our findings in this section:
 
--   We examined genetic data from 1KGP to look at patterns of allele sharing on chromosome 22. By plotting ***allele frequency*** as a histogram, we saw that most genetic variants are rare - consistent with an evolutionary history of recent population expansion.
+-   We examined genetic data from 1KGP to look at patterns of allele sharing on chromosome 22. By plotting ***allele frequency*** as a histogram, we saw that most ***genetic variants*** are rare - consistent recent population expansions.
 
--   We used ***principle component analysis*** to investigate the relationships between samples in 1KGP, showing that the first two *principle components* partially stratify the five "continental groups" (though only explain a fraction of all genetic variance observed). Although we only looked at a single chromosome (the shortest autosome), the trends observed in this section also apply across the whole genome.
+-   We used ***principle component analysis*** to investigate the relationships between samples in 1KGP, showing that the first two ***principle components*** partially stratify the five *continental groups* (though only explain a fraction of all genetic variance observed). Although we only looked at a single chromosome (the shortest autosome), the trends observed in this section are consistent across the whole genome.
 
 ------------------------------------------------------------------------
 
@@ -282,37 +379,43 @@ To summarize our findings in this section:
 
 In the section above, we used genotype data from a globally diverse cohort to examine the history of human evolution (and describe modern populations). Here, we'll leverage human genetic diversity to identify genetic loci associated with a trait.
 
-***Genome-wide association studies*** (GWAS) are a type of functional genomic assay that leverages ***linear regression*** to test for associations between a phenotype (e.g., height, resting pulse, or risk of a disease) and a genetic variant. GWAS; but if you'd like to learn more, please take a look at the [2021 *Nature Reviews* article by Uffelmann *et al*.](https://www.nature.com/articles/s43586-021-00056-9).
+***Genome-wide association studies*** (***GWAS***) are a type of functional genomic assay that leverages ***linear regression*** to test for associations between a genetic variant and a phenotype (e.g., height, resting pulse, or risk of a disease). If you'd like to learn more about ***GWAS***, check out [Uffelmann](#0)[*et al. 2021*](https://www.nature.com/articles/s43586-021-00056-9).
 
-For this exercise, we'll use data from the [Pan-UK Biobank](https://pan.ukbb.broadinstitute.org/) to generate *Manhattan plots* - a common visualization format for representing the genomic landscape of trait associations. The Pan-UK Biobank is a human genetics data resource that aggregates both genotype and health-related data from \~500,000 individuals across the UK of diverse ancestry. By combining the genotype information and biometric data, the Pan-UK Biobank performed a GWAS for over [7,000 traits (phenotypes)](https://pan.ukbb.broadinstitute.org/phenotypes) and the data is publicly accessible.
+In the following exercises, we'll use data from the [Pan-UK Biobank](https://pan.ukbb.broadinstitute.org/) to generate ***Manhattan plots*** - a common visualization format used to present ***GWAS*** results.
+
+The Pan-UK Biobank is a [publicly available](https://pan.ukbb.broadinstitute.org/phenotypes) human genetics resource that aggregates both genetic and health-related data from $N\approx500,000$ individuals. Below, we'll look at results from performing ***GWAS*** on *LDL cholesterol.*
 
 ### 2.2 GWAS for *LDL Cholesterol*
 
-We'll begin by working through an example GWAS for *LDL cholesterol,* a blood biochemistry measurement that is associated with increased risk for coronary artery disease. Here, we'll work together to reproduce a pre-generated Manhattan plot before turning to an independent exercise.
+*LDL cholesterol* is a blood biochemistry measurement that is positively correlated with increased risk for coronary artery disease.
 
-![](data/LDL_GWAS_example.png)
+We'll work together to reproduce the following pre-generated ***Manhattan plot*** before turning to an independent exercise. At a broad level, a ***Manhattan plot*** shows ***GWAS*** results across the whole genome, with each point representing a single ***genetic variant***. Whereas the *x-axis* corresponds to the genomic position for each variant, the *y-axis* corresponds to the strength of correlation (*p*-value) between the variant and the trait of interest (in this case, *LDL cholesterol*). In the plot below, we can see there are two strong signals for a genetic association with *LDL cholesterol*.
 
-Below, we'll outline the critical components of the plot:
+![](../data/LDL_GWAS_example.png)
+
+Stepping back from the biological interpretations of the plot, let's dissect the individual components of the plot:
 
 1.  *x-axis* is *position* (labeled by chromosome only)
-2.  *y-axis* is the association *p-value* (`-log10` transformed for plotting)
-3.  *values* are being plotted as points (i.e., it's a scatter plot)
-4.  Two horizontal dotted lines associated with two *statistical significance cutoffs* (we'll discuss this more below)
+2.  *y-axis* is ***p-value*** (`-log10` transformed)
+3.  *values* are being plotted as points (i.e., scatter plot)
+4.  Two horizontal dotted lines are plotted (these are thresholds for significance)
 
-Now that we have our axes defined, let's look at the data:
+With axes defined, we'll load the data:
 
-```{r}
+```{r, message = FALSE}
 
-df <- read_csv(file = "data/PanUKB_LDL_subset.csv.gz",
+df <- read_csv(file = "../data/PanUKB_LDL_subset.csv.gz",
                show_col_types = FALSE)
 head(df)
 ```
 
+The first four variables of our data are the *chromosome*, *position*, *reference allele,* and *alternative allele*, respectively. The `neglog10_pval_meta` variable is the $-\text{log}_{10}(p\text{-value})$ for the association between the ***genetic variant*** and *LDL cholesterol.* The final column, `bonfp`, is a multiple-testing corrected ***p-value***. We won't be discussing the critical subject of multiple-testing correction in this workshop, but you can read more about it in [Chapter 13 of Introduction to Statistical Learning](https://www.statlearning.com/).
+
+Before we begin plotting, let's touch on a common plotting paradigm: plotting ***p-values*** as $-\text{log}_{10}(p\text{-value})$.
+
 #### 2.2.1 Note on plotting *p*-values.
 
-While the first four columns of our ***data frame*** are directly interpretable (*chromosome, position, reference allele,* and *alternative* allele, respectively), the `neglog10_pval_meta` column corresponds to the $-log_{10}(p\text{-value})$ for the association between the alternative allele and the trait of interest (i.e., *LDL cholesterol*).
-
-To illustrate why we $log_{10}$ transform p-values for plotting, let's simulate some data to show what it looks like to plot raw p-values:
+To illustrate why we $-log_{10}$ transform p-values for plotting, let's simulate some data to show what it looks like to plot raw p-values:
 
 ```{r}
 
@@ -324,7 +427,13 @@ head(p_df)
 
 ```
 
-The `p_df` data frame above contains p-values ranging from $10^0$ to $10^{-300}$. Below, we'll compare two plots: one with raw p-values plotted on the y-axis, and one with $-log_{10}$-transformed p-values. We'll once again use the `patchwork` library for a multipanel plot.
+The `p_df` ***data frame*** above contains p-values ranging from $10^0$ to $10^{-300}$. Remember, ***p-values*** are probability of our observed data (or more extreme) under the null hypothesis. In ***GWAS*** (which relies on ***linear regression***), the null hypothesis is that there's no association between a ***genetic variant*** and the phenotype.
+
+Below, we'll compare two plots:
+
+-   Raw ***p-values*** plotted on the y-axis
+
+-   $-log_{10}$-transformed ***p-values***. We'll once again use the `patchwork` library.
 
 ```{r}
 
@@ -333,193 +442,440 @@ library(patchwork)
 
 # Plot raw p-values
 g1 <- ggplot(data = p_df,
-       mapping = aes(x=idx,y=p)) +
-  geom_point() +
+             mapping = aes(x = idx,
+                           y = p)) +
+  geom_point(size = 0.5) +
   theme_classic() +
-  labs(y = expression(p))
+  labs(title = "raw p-values",
+       y = expression(p),
+       x = expression(10^-x))
 
 # Plot -log10(p-values)
 g2 <- ggplot(data = p_df,
-       mapping = aes(x=idx,y=-log10(p))) +
-  geom_point() +
+             mapping = aes(x = idx,
+                           y = -log10(p))) +
+  geom_point(size = 0.5) +
   theme_classic() +
-  labs(y = expression(-log[10](p)))
+  labs(title = "transformed p-values",
+       y = expression(-log[10](p)),
+       x = expression(10^-x))
 
 # Plot 
 (g1 | g2)
 
 ```
 
+As we can see in the plot on the left, the raw ***p-values*** are difficult to interpret because they are compressed near zero. In contrast, the plot on the right shows that the $-log_{10}$ transformation expands the range of values and makes it easier to visualize differences in ***p-value***, even when those differences are very small.
+
 #### 2.2.2 Constructing the Manhattan plot.
 
-We'll start by plotting on the x- and y-axes, then introduce other elements. This will be the most complex plot we'll produce during the workshop, so we'll work carefully layer-by-layer:
+Returning to reproducing the ***Manhattan plot*** above, we'll begin by plotting values on the *x-* and *y-axes*, then introduce other elements. This will be the most complex plot we'll produce during the workshop, so we'll work carefully layer-by-layer. [Each plotting step can take some time to render, as there are many points to plot]{.underline}.
 
-```{r}
+1.  Using the ***GWAS*** data loaded earlier (`df`), plot `pos` on the *x-axis* and `neglog10_pval_meta` on the *y-axis*. Facet by *chromosome* (`chr`), as each `pos` can appear on multiple chromosomes. Here are some important ***functions*** in this step:
+    -   `geom_point()`
 
-# Plot `pos` on x-axis, `neglog10_pval_meta` on y-axis, and facet by chromosome (`pos` values can be repeated on each chromosome!). 
-# Within `facet_wrap()`, use the `ncol` argument to specify the number of facets to present as columns.
+    -   `facet_wrap()`, use the `ncol = 23` argument to arrange chromosome facets side-by-side
+
+```{r, warning = FALSE}
+
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta)) +
+  geom_point() +
+  facet_wrap(~chr, ncol = 23)
   
 ```
 
-Using only a few lines of code, we made a lot of progress towards reproducing the example Manhattan plot above. However, there are still a few key elements that are missing in our plot. Let's look at the figure again and identify differences that affect interpretation:
+Lets compare our plot above to the one we're trying to recreate:
 
 ![](../data/LDL_GWAS_example.png)
 
-In our plot:
+Obviously we have some work to do. Here are some lingering issues:
 
-1.  `facets` are out of order
-2.  `y-axis` upper-bound is too high
-3.  `x-axis` labels are incomprehensible
-4.  Dotted lines for p-value significance thresholds are missing
+-   `facets` are out of order
+-   `y-axis` upper-bound is too high
+-   `x-axis` labels are incomprehensible
+-   Dotted lines for p-value significance thresholds are missing
 
-We'll tackle these in order:
+We'll tackle each point above in order.
+
+2.  Arrange facets (*chromosomes*). Here, we'll need to use `mutate()` to convert the `chr` variable to a factor and specify the order in which we expect the factor levels to appear.
 
 ```{r}
 
-# To order our `chr` variable, we will use `mutate()` to convert this column into a `factor`. Using `factors` we can specify the order that chromosome values should appear in.
+# Create vector
+chrs <- c(1:22, "X") 
 
-df$chr %>% 
-  unique() # Allows us to print the values that occupy the `chr` column
-
-chrs <- c(1:22, "X") # Create a vector listing 1 to 22, then followed by "X"
-
+# Convert chr variable
 df <- df %>%
-  mutate(chr = factor( x = df$chr, levels = chrs)) # Use the `factor()` function to order the "levels" of df$chr according to our `chrs` vector
+  mutate(chr = factor(x = df$chr,
+                      levels = chrs)) 
 
-# Now that we've re-factored our `chrs` variable, plot using the same plotting command we constructed above:
-
-```
-
-Using `factor()`, we changed our `chr` variable from unorganized *`character`* variable, to an ordered *`factor`* variable. This is a very common procedure when plotting categorical variables where order matters (e.g., months of the year).
-
-Next, we'll address the *y-axis* bounds and the *x-axis* labels:
-
-```{r}
-
-# Adjust the y-axis bounds with `scale_y_continuous()`
-
-```
-
-```{r}
-
-# Remove the noisy x-axis text with `theme()`
-
-```
-
-```{r}
-
-# Make a few more clarity changes: 
-# 1. Remove x-axis features (`theme()`)
-# 2. Add axis labels (`labs()`)
-# 3. Move facet labels to the bottom (`strip.position = "bottom"` in `facet_wrap`)
-
-```
-
-Now that we've organized the axes and made a few style adjustments, we can add the last major plotting feature: significance threshold lines. In the example plot, there are two dotted lines:
-
-1.  Black dashed line: Nominal significance threshold ($p < 0.05$)
-2.  Red dashed line: Genome-wide significance threshold ($p < 5 \times 10^{-8}$)
-
-![](data/LDL_GWAS_example.png)
-
-We can add these two lines (after applying a `-log10` transform so they can be plotted on the same scale as our p-values) using `geom_hline()`:
-
-```{r}
-
-# Add `geom_hline` on top of the scatter plot layer
-
-
-```
-
-With that addition, the Manhattan plot we've assembled is quantitatively the same as the example we were trying to recreate!
-
-However, we can still improve the visual components of the plot to facilitate interpretability:
-
-1.  The points are large and overlapping (this is a phenomenon called *overplotting*)
-2.  We have large gaps between chromosome columns
-3.  Using colors, we can better distinguish observations between adjacent chromosomes.
-
-To address points 1 and 2, we'll pivot from `facet_wrap()` to `facet_grid()` which provides more control to spacing when we have prior knowledge on the number of facets.
-
-```{r}
-
-# Replace the `facet_wrap` layer with the following `facet_grid` command:
-facet_grid(cols = vars(chr), # Create a column facet for each chr
-           switch = "x", # Place facet label on bottom
-           space = "free_x", # Allow facets to be different widths
-           scales = "free_x") # Allow chrs to have different bounds
-
-```
-
-Finally, we'll add color to each point in our plot (dependent upon chromosome) using `scale_color_manual()`. To achieve this, we'll add an *aesthetic* for the `chr` variable, and set the values for each `chr` using the `values` argument of `scale_color_manual()`
-
-```{r}
-
-# Create a vector of color strings of length equal to the number of levels in df$chr
-# Try running the following command, element by element, in the console below to figure out what it does
-cols <- c(rep(x = c("blue","orange"), times = 11),
-          "blue") 
-
-# Add `chr` as a color aesthetic, and add the following `scale_color_manual` command to your plot
-
-... +
-  scale_color_manual(values = cols)
-
-```
-
-We've now faithfully reproduced the plot showing the same result! While we could make some further modifications, this example serves as a scaffold for which ***Manhattan plots*** can be built from the ground up.
-
-Biologically, we observe the strongest signal for high *LDL Cholesterol* at the end of chromosome 6. This GWAS peak is in the gene *LPA* which is fundamental to plasma lipoprotein assembly.
-
-------------------------------------------------------------------------
-
-### 2.3 Manhattan plotting exercise
-
-As a final exercise to this lesson (and the workshop as a whole), we will use the blood glucose GWAS result from the Pan-UK Biobank:
-
-```{r}
-
-df <- read_csv(file="PanUKB_Glu_subset.csv.gz")
+# Preview data
 head(df)
 
 ```
 
-With these data, practice data preparation and plotting by performing the following tasks:
+3.  Now that we've converted the `chr` variable, regenerate the plot using the same plotting command from earlier
 
-```{r}
-#   1. Remove the `bonfp` column using `select()` from `dplyr`
+```{r, warning = FALSE}
 
-```
-
-```{r}
-#   2. Filter the data frame to only chromosomes 1 through 5 (you can use the following expression `chr %in% c(1:5)` with `filter()` to test whether `chr` is any value in 1:5)
-
-```
-
-```{r}
-#   3. Create a Manhattan plot for your filtered data frame where:
-#     a. The `color` aes is scaled by chromosome
-#     b. Include horizontal lines for significance cutoff(s)
-#     c. Readily interpretable (e.g., fix axis labels & aesthetic changes)
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta)) +
+  geom_point() +
+  facet_wrap(~chr, ncol = 23)
 
 ```
 
-```{r}
-#   4. Filter the data frame to include only the chromosome with the highest p-value
+Now that our facets are in order, we'll address the *x-* and *y-axes*
+
+4.  Use `scale_y_continuous(limits = ...)` to set the *y-axis* limits of the plot to $100$
+
+```{r, warning = FALSE}
+
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta)) +
+  geom_point() +
+  scale_y_continuous(limits = c(0,100)) +
+  facet_wrap(~chr, ncol = 23)
 
 ```
 
-```{r}
-#   5. Plot the Manhattan plot for only this chromosome
+5.  Now that we have better *y-axis* resolution, we'll remove the *x-axis* text entirely within the `theme()` command for `ggplot` ***objects***. `theme()` offers a lot of control over the plotting visuals, take a look at the documentation!
+
+```{r, warning = FALSE}
+
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta)) +
+  geom_point() +
+  scale_y_continuous(limits = c(0,100)) +
+  facet_wrap(~chr, ncol = 23) +
+  theme(axis.text.x = element_blank())
 
 ```
 
-```{r}
-#   6. Using a similar method as `scale_y_continuous(limits = c(0, 100))` that we used in the example above, use `scale_x_continuous(limits = ...)` to zoom into the strongest hit on the chromosome (this may take several attempts)
+A few more changes for clarity before moving onto the horizontal lines.
+
+6.  Remove all *x-axis* features (using `theme()`), add axis labels (using `labs()`), and move the facet labels to the bottom of the plot.
+
+```{r, warning = FALSE}
+
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta)) +
+  geom_point() +
+  scale_y_continuous(limits = c(0,100)) +
+  facet_wrap(~chr,
+             ncol = 23,
+             switch = "x") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(x = "position",
+       y = expression(-log[10](p)))
 
 ```
 
-Unlike the LDL GWAS, there are many significant hits for loci that influence blood glucose biochemistry. Although GWAS is a powerful tool to identify genetic associations with a trait, these analyses often open more questions than they answer - ones that require further scientific rigor to understand the mechanisms underlying the association.
+7.  Now we'll add the horizontal dotted lines that specify the two significance thresholds used in ***GWAS***:
+    -   Black dashed line: Nominal significance threshold ($p < 0.05$)
+
+    -   Red dashed line: Genome-wide significance threshold ($p < 5 \times 10^{-8}$)
+
+```{r, warning = FALSE}
+
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta)) +
+  geom_point() +
+  scale_y_continuous(limits = c(0,100)) +
+  geom_hline(yintercept = -log10(0.05),
+             color = "black",
+             linetype = 2) +
+  geom_hline(yintercept = -log10(5e-8),
+             color = "red",
+             linetype = 2) +
+  facet_wrap(~chr,
+             ncol = 23,
+             switch = "x") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(x = "position",
+       y = expression(-log[10](p)))
+
+```
+
+With that addition, the ***Manhattan plot*** we've assembled is ***quantitatively*** the same as the example we were trying to recreate!
+
+However, we can still improve the visual components of the plot to facilitate interpretability. Here are some more adjustments:
+
+8.  The points are large and overlapping (this is a phenomenon called *overplotting*). We'll reduce the `size` of each point in `geom_point()`. We'll also add `theme_minimal()` to the plotting script.
+
+```{r, warning = FALSE}
+
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta)) +
+  geom_point(size = 0.5) +
+  scale_y_continuous(limits = c(0,100)) +
+  geom_hline(yintercept = -log10(0.05),
+             color = "black",
+             linetype = 2) +
+  geom_hline(yintercept = -log10(5e-8),
+             color = "red",
+             linetype = 2) +
+  facet_wrap(~chr,
+             ncol = 23,
+             switch = "x") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(x = "position",
+       y = expression(-log[10](p)))
+
+```
+
+9.  As each *chromosome* has different lengths, latter chromosomes show quite a bit of empty space (see *chromosome 22* in the plot above). We'll replace the `facet_wrap()` function with a `facet_wrap()` command that offers a bit more control:
+
+```{r, warning = FALSE}
+
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta)) +
+  geom_point(size = 0.5) +
+  scale_y_continuous(limits = c(0,100)) +
+  geom_hline(yintercept = -log10(0.05),
+             color = "black",
+             linetype = 2) +
+  geom_hline(yintercept = -log10(5e-8),
+             color = "red",
+             linetype = 2) +
+  facet_grid(cols = vars(chr), 
+             switch = "x",
+             space = "free_x", 
+             scales = "free_x") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(x = "position",
+       y = expression(-log[10](p)))
+
+```
+
+10. Finally, we'll add color to each point in our plot (dependent upon chromosome) using `scale_color_manual()`. To achieve this, we'll add an *aesthetic* for the `chr` variable, and set the values for each `chr` using the `values` argument of `scale_color_manual().` We'll also set `guide = none`, as we don't need a color legend.
+
+```{r, warning = FALSE}
+
+# Generate color pattern vector
+plot_colors <- c(rep(x = c("blue","orange"),
+                     times = 11),"blue") 
+
+# Add color to plot
+
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta,
+                     color = chr)) +
+  geom_point(size = 0.5) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_color_manual(values = plot_colors,
+                     guide = "none") +
+  geom_hline(yintercept = -log10(0.05),
+             color = "black",
+             linetype = 2) +
+  geom_hline(yintercept = -log10(5e-8),
+             color = "red",
+             linetype = 2) +
+  facet_grid(cols = vars(chr), 
+             switch = "x",
+             space = "free_x", 
+             scales = "free_x") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(x = "position",
+       y = expression(-log[10](p)))
+
+```
+
+The ***Manhattan plot*** is looking great! While we could make some further modifications got clarity, this exercise serves as an example of how you can build complex plots piece-by-piece to communicate your science!
+
+Biologically, we observe the strongest signal for high *LDL Cholesterol* at the end of chromosome 6. This ***GWAS*** peak is in the gene *LPA* which is fundamental to plasma lipoprotein assembly.
+
+### 2.3 Manhattan plot exercise
+
+As a final exercise to this lesson (and the workshop as a whole), we will plot *blood glucose* ***GWAS*** results from the Pan-UK Biobank. We'll load the data below:
+
+```{r, message = FALSE}
+
+df <- read_csv(file = "../data/PanUKB_Glu_subset.csv.gz")
+
+# Preview data
+head(df)
+
+```
+
+With these data, perform the following tasks:
+
+1.  Remove the `bonfp` variable from `df` using `select()`
+
+```{r, warning = FALSE}
+
+df <- df %>%
+  select(!bonfp)
+
+head(df)
+
+```
+
+2.  Filter the ***data frame*** to contain only chromosomes 1 through 5 using the `filter()` ***function***.
+
+```{r, warning = FALSE}
+
+df <- df %>%
+  filter(chr %in% 1:5)
+
+```
+
+3.  Make a ***Manhattan plot*** of the results in `df`. Ensure the following:
+    -   `chr` variable is ordered and has alternating colors
+    -   Horizontal lines for each significance cutoff ($p = 0.05$ and $p = 5 \times 10^{-8}$).
+    -   Readily *interpretable* (e.g., fix axis labels & aesthetic changes)
+
+```{r, warning = FALSE}
+
+# Convert chr to factor
+df <- df %>%
+  mutate(chr = factor(x = chr,
+                      levels = c(1,2,3,4,5)))
+
+# Generate color pattern vector
+plot_colors <- c("blue", "green",
+                 "blue", "green",
+                 "blue")
+
+# Plot using same framework as above
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta,
+                     color = chr)) +
+  geom_point(size = 0.5) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_color_manual(values = plot_colors,
+                     guide = "none") +
+  geom_hline(yintercept = -log10(0.05),
+             color = "black",
+             linetype = 2) +
+  geom_hline(yintercept = -log10(5e-8),
+             color = "red",
+             linetype = 2) +
+  facet_grid(cols = vars(chr), 
+             switch = "x",
+             space = "free_x", 
+             scales = "free_x") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(x = "position",
+       y = expression(-log[10](p)))
+
+```
+
+4.  Filter the ***data frame*** to include on the chromosome with the smallest ***p-value.*** Remember, `neglog10_pval_meta` is $-\text{log}_{10}$ transformed, so [larger]{.underline} values of this variable are [smaller]{.underline} ***p-values.***
+
+```{r, warning = FALSE}
+
+# Summarise by lowest p per chr
+minp_per_chrom <- df %>% 
+  summarise(minp = max(neglog10_pval_meta, na.rm = TRUE),
+            .by = chr) %>%
+  arrange(-minp)
+
+# Extract chr with lowest p
+lowest_chr <- minp_per_chrom[1,1]
+
+# Print result
+lowest_chr
+
+```
+
+5.  Create a ***Manhattan plot*** for only the chromosome with the lowest ***p-value***. Remove any *y-axis* limits if you have them.
+
+```{r, warning = FALSE}
+
+# Subset df
+df <- df %>%
+  filter(chr == 2)
+
+# Plot 
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta,
+                     color = chr)) +
+  geom_point(size = 0.5) +
+  scale_color_manual(values = plot_colors,
+                     guide = "none") +
+  geom_hline(yintercept = -log10(0.05),
+             color = "black",
+             linetype = 2) +
+  geom_hline(yintercept = -log10(5e-8),
+             color = "red",
+             linetype = 2) +
+  facet_grid(cols = vars(chr), 
+             switch = "x",
+             space = "free_x", 
+             scales = "free_x") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(x = "position",
+       y = expression(-log[10](p)))
+
+```
+
+6.  Using `scale_x_continuous()`, zoom in within $\pm 1,000,000$ base pairs of the lead variant (with the lowest ***p-value***). *Tip: You can use* `df[[row,column]]` *to extract the exact value in a **data frame**.*
+
+```{r, warning = FALSE}
+
+# Arrange by p-value
+df <- df %>%
+  arrange(-neglog10_pval_meta)
+
+# Pull locus
+loc <- df[[1,2]]
+
+# Plot with x range defined by loc
+ggplot(data = df,
+       mapping = aes(x = pos,
+                     y = neglog10_pval_meta,
+                     color = chr)) +
+  geom_point(size = 0.5) +
+  scale_x_continuous(limits = c(loc - 1e6,
+                                loc + 1e6)) +
+  scale_color_manual(values = plot_colors,
+                     guide = "none") +
+  geom_hline(yintercept = -log10(0.05),
+             color = "black",
+             linetype = 2) +
+  geom_hline(yintercept = -log10(5e-8),
+             color = "red",
+             linetype = 2) +
+  facet_grid(cols = vars(chr), 
+             switch = "x",
+             space = "free_x", 
+             scales = "free_x") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(x = "position",
+       y = expression(-log[10](p)))
+
+```
+
+------------------------------------------------------------------------
+
+**Congratulations!** You've now learned how to use R (and `ggplot`) to reproduce complex plots that are commonly used in the field of genetics! As you continue to encounter data visualization media in your research, dissecting the components of a plot can help you understand what it's trying to communicate, the underlying data, and how to reproduce it.
 
 ------------------------------------------------------------------------
 
@@ -529,12 +885,12 @@ Unlike the LDL GWAS, there are many significant hits for loci that influence blo
 
 We've covered quite a lot in four days, so lets review what we've covered:
 
--   **Day 1**: Introduction to R as a programming language
--   **Day 2**: R as a platform for data science
--   **Day 3**: Probability and statistics in R
--   **Day 4**: Using R to reproduce biological results
+-   **Day 1**: *Introduction to R*
+-   **Day 2**: *Tidyverse*
+-   **Day 3**: *Probability & statistics*
+-   **Day 4**: *Genetic data*
 
-R is a powerful and flexible tool for data science. As you continue forward in research (both within your REU and perhaps beyond it), you will likely encounter many more opportunities to use R (or other programming languages) to ask and answer scientific questions.
+R is a powerful and flexible tool for ***data science***. As you continue forward in research , you will likely encounter many more opportunities to use R (or other programming languages) to ask and answer scientific questions.
 
 As a reminder, the following resources are available freely online should you want to continue practicing:
 
